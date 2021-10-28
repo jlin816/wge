@@ -121,8 +121,8 @@ class ExecutionEnvironment(object):
             text = dom.text
             if text is not None:
                 text = Phrase(strip_punctuation(text))
-                for length in xrange(1, 4):
-                    for i in xrange(len(text.tokens) - length + 1):
+                for length in range(1, 4):
+                    for i in range(len(text.tokens) - length + 1):
                         strings.add(text.detokenize(i, i + length))
         return strings
 
@@ -195,9 +195,8 @@ class ExecutionEnvironment(object):
                 self._cache.setdefault(cls, set()).add(element)
 
 
-class ProgramToken(object):
+class ProgramToken(object, metaclass=abc.ABCMeta):
     """Base class for all program tokens."""
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def execute(self, env):
@@ -342,7 +341,7 @@ class TypeToken(ProgramAction):
         token (ProgramToken): must execute to unicode
     """
     def __init__(self, token):
-        assert token.return_type == unicode
+        assert token.return_type == str
 
         self._token = token
 
@@ -372,7 +371,7 @@ class FocusAndTypeToken(ProgramAction):
     """
     def __init__(self, elem_token, string_token):
         assert elem_token.return_type == ElementSet
-        assert string_token.return_type == unicode
+        assert string_token.return_type == str
         self._elem_token = elem_token
         self._string_token = string_token
 
@@ -462,7 +461,7 @@ class StringToken(ProgramToken):
         s (unicode): the wrapped string
     """
     def __init__(self, s):
-        assert isinstance(s, unicode)
+        assert isinstance(s, str)
 
         self._string = s
 
@@ -471,7 +470,7 @@ class StringToken(ProgramToken):
 
     @property
     def return_type(self):
-        return unicode
+        return str
 
     def __str__(self):
         return "String({})".format(repr(self._string))
@@ -496,15 +495,15 @@ class FieldsValueSelectorToken(ProgramToken):
             raise ProgramExecutionException(
                     "fields.values[{}] out of bounds".format(self._index))
 
-        entries = zip(fields.keys, fields.values)
+        entries = list(zip(fields.keys, fields.values))
         entries.sort(key=lambda x: x[0])
-        _, values = zip(*entries)
+        _, values = list(zip(*entries))
 
         return values[self._index]
 
     @property
     def return_type(self):
-        return unicode
+        return str
 
     def __str__(self):
         return "FieldsValueSelector({})".format(self._index)
@@ -543,14 +542,14 @@ class UtteranceSelectorToken(ProgramToken):
 
     @property
     def return_type(self):
-        return unicode
+        return str
 
     def __str__(self):
         return "UtteranceSelector({}, {})".format(self._start, self._end)
     __repr__ = __str__
 
 
-class ElementSetToken(ProgramToken):
+class ElementSetToken(ProgramToken, metaclass=abc.ABCMeta):
     """Token that executes to an ElementSet.
 
     Args:
@@ -558,7 +557,6 @@ class ElementSetToken(ProgramToken):
             execution excludes all elements whose classes has an empty
             intersection with this classes. None accepts all classes.
     """
-    __metaclass__ = abc.ABCMeta
     def __init__(self, classes=None):
         self._classes = set(classes.split()) if classes else None
 
@@ -667,8 +665,7 @@ class LastToken(ProgramToken):
     __repr__ = __str__
 
 
-class DistanceToken(ElementSetToken):
-    __metaclass__ = abc.ABCMeta
+class DistanceToken(ElementSetToken, metaclass=abc.ABCMeta):
     """Base class for tokens that map ElementSets to ElementSets by some sort
     of distance metric. Optional classes argument restricts to only elements
     matching that classes arg.
@@ -775,7 +772,7 @@ class StringMatchToken(ElementSetToken):
     def __init__(self, token, classes=None):
         super(StringMatchToken, self).__init__(classes)
 
-        assert token.return_type == unicode
+        assert token.return_type == str
         self._token = token
 
     def _execute(self, env):

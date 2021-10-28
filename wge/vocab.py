@@ -15,7 +15,7 @@ class LazyInitVocab(SimpleVocab):
         initial_tokens (list[unicode]): unique list of initial tokens
         max_size (int): maximum size of the vocab
     """
-    UNK = u"<unk>"
+    UNK = "<unk>"
     def __init__(self, initial_tokens, max_size):
         initial_tokens.insert(0, LazyInitVocab.UNK)
         assert len(initial_tokens) <= max_size

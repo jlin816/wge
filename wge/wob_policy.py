@@ -28,10 +28,9 @@ from wge.rl import Policy, Justification, Episode, Trace, ScoredExperience, Acti
 from wge.utils import word_tokenize
 
 
-class MiniWoBPolicy(Policy):
+class MiniWoBPolicy(Policy, metaclass=abc.ABCMeta):
     CLICK = 0
     TYPE = 1
-    __metaclass__ = abc.ABCMeta
 
     @classmethod
     def from_config(cls, config):
@@ -882,10 +881,10 @@ class StructuredQueryPolicy(MiniWoBPolicy):
             if len(keys) < max_num_fields:
                 submask[len(keys):] = 0.
                 keys.extend(
-                    [[UtteranceVocab.PAD] for _ in xrange(
+                    [[UtteranceVocab.PAD] for _ in range(
                         max_num_fields - len(keys))])
                 values.extend(
-                    [[UtteranceVocab.PAD] for _ in xrange(
+                    [[UtteranceVocab.PAD] for _ in range(
                         max_num_fields - len(values))])
 
         # Flatten to list[list[unicode]] (batch * num_keys) x key length
@@ -1009,7 +1008,7 @@ class NaturalLanguagePolicy(MiniWoBPolicy):
             # Calculate the corresponding type actions
             type_values_batch = []
             mask = np.zeros((batch_size, k * k)).astype(np.float32)
-            for batch_idx in xrange(batch_size):
+            for batch_idx in range(batch_size):
                 state = states[batch_idx]
                 type_values = []
                 for i, start_index in enumerate(top_k_start_indices[batch_idx].data.cpu().numpy()):
@@ -1121,8 +1120,8 @@ class MiniWoBPolicyJustification(Justification):
 
     def to_json_dict(self):
         def as_pairs(items, probs):
-            item_strs = [unicode(item) for item in items]
-            prob_floats = [round(f, 4) for f in probs]
+            item_strs = [str(item) for item in items]
+            prob_floats = [float(round(f, 4)) for f in probs]
             return sorted(zip(item_strs, prob_floats), key=lambda x: -x[1])
 
         return {
@@ -1156,9 +1155,9 @@ class MiniWoBPolicyJustification(Justification):
         values_str = self._pretty_string(
                 self._type_values, self._type_value_probs)
 
-        return (u"elements:\n{}\nvalue attentions:\n{}\n"
-                u"value attentions 2:\n{}\naction type:\n{}\n"
-                u"typed:\n{}\nstate value: {:.3f}").format(
+        return ("elements:\n{}\nvalue attentions:\n{}\n"
+                "value attentions 2:\n{}\naction type:\n{}\n"
+                "typed:\n{}\nstate value: {:.3f}").format(
                     indent(elems_str), indent(values_attn_str),
                     indent(values_attn_str2), indent(type_str),
                     indent(values_str), self._state_value)
@@ -1179,9 +1178,9 @@ class MiniWoBPolicyJustification(Justification):
         items = []
         for thing, prob in sorted(
                 zip(things, thing_probs),
-                key=lambda (thing, prob): prob, reverse=True):
+                key=lambda thing_prob: thing_prob[1], reverse=True):
             selected = '>' if thing == selected_thing else ' '
-            items.append(u'{} [{:.3f}] {}'.format(selected, prob, thing))
+            items.append('{} [{:.3f}] {}'.format(selected, prob, thing))
         return '\n'.join(items)
 
 
@@ -1213,15 +1212,15 @@ class ReplayBufferUpdateTrace(Trace):
         }
 
     def dumps(self):
-        weighted_episodes = zip(self._scored_episodes, self._importance_weights, self._model_probs)
+        weighted_episodes = list(zip(self._scored_episodes, self._importance_weights, self._model_probs))
         weighted_episodes.sort(key=lambda x: -x[1])  # sort by importance weight
 
-        episodes_str = u'\n\n'.join(
-            u'===== EPISODE {i} (importance weight = {importance:.3f}, model prob = {model:.3f}) =====\n\n{episode}'
+        episodes_str = '\n\n'.join(
+            '===== EPISODE {i} (importance weight = {importance:.3f}, model prob = {model:.3f}) =====\n\n{episode}'
             .format(i=i, importance=importance, model=model_prob, episode=indent(MiniWoBEpisodeTrace(ep).dumps()))
             for i, (ep, importance, model_prob) in enumerate(weighted_episodes)
         )
-        return u'Replay buffer:\n{samples}\n\nImportance weights:\n{weights}\n\n{episodes}'.format(
+        return 'Replay buffer:\n{samples}\n\nImportance weights:\n{weights}\n\n{episodes}'.format(
             samples=indent(self._sample_trace.dumps() if self._sample_trace else None),
             weights=sorted([round(w, 3) for w in self._importance_weights], reverse=True),
             episodes=episodes_str,

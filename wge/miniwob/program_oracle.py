@@ -48,16 +48,16 @@ class ClickTab2OracleProgramPolicy(LinearProgramPolicy):
         # Appears in other tabs
         labeled_demos += [LabeledDemonstration.from_oracle_programs(
             [[WeightedProgram(
-                ClickToken(LikeToken(StringToken(u"Tab #2"))), 1)],
+                ClickToken(LikeToken(StringToken("Tab #2"))), 1)],
              [WeightedProgram(
                  ClickToken(LikeToken(UtteranceSelectorToken(12, 13))), 1)]],
             "Switch between the tabs to find and click on the link \"x\".",
             Fields({"target": "x"}))]
         labeled_demos += [LabeledDemonstration.from_oracle_programs(
             [[WeightedProgram(
-                ClickToken(LikeToken(StringToken(u"Tab #2"))), 1)],
+                ClickToken(LikeToken(StringToken("Tab #2"))), 1)],
              [WeightedProgram(
-                ClickToken(LikeToken(StringToken(u"Tab #3"))), 1)],
+                ClickToken(LikeToken(StringToken("Tab #3"))), 1)],
              [WeightedProgram(
                  ClickToken(LikeToken(UtteranceSelectorToken(12, 13))), 1)]],
             "Switch between the tabs to find and click on the link \"x\".",
@@ -88,7 +88,7 @@ class ClickTabMediumOracleProgramPolicy(LinearProgramPolicy):
             Fields({"target": "x"}))]
         labeled_demos += [LabeledDemonstration.from_oracle_programs(
             [[WeightedProgram(
-                ClickToken(LikeToken(StringToken(u"Tab #2"))), 1)]],
+                ClickToken(LikeToken(StringToken("Tab #2"))), 1)]],
             "Switch between the tabs to find and click on the link \"x\".",
             Fields({"target": "x"}))]
 
@@ -111,13 +111,13 @@ class LoginUserOracleProgramPolicy(LinearProgramPolicy):
         labeled_demos = [LabeledDemonstration.from_oracle_programs(
             [[WeightedProgram(
                 FocusAndTypeToken(NearToken(LikeToken(
-                    StringToken(u"Username"))), UtteranceSelectorToken(4, 5)),
+                    StringToken("Username"))), UtteranceSelectorToken(4, 5)),
                 1)],
              [WeightedProgram(
                 FocusAndTypeToken(NearToken(LikeToken(StringToken(
-                    u"Password"))), UtteranceSelectorToken(10, 11)), 1)],
+                    "Password"))), UtteranceSelectorToken(10, 11)), 1)],
              [WeightedProgram(
-                ClickToken(LikeToken(StringToken(u"Login"))), 1)]],
+                ClickToken(LikeToken(StringToken("Login"))), 1)]],
             "Enter the username \"blah\" and the password \"blah\" into the text fields and press login.",
             Fields({"username": "blah", "password": "blah"}))]
 
@@ -130,12 +130,12 @@ class EmailInboxReplyOracleProgramPolicy(LinearProgramPolicy):
             [[WeightedProgram(
                 ClickToken(LikeToken(FieldsValueSelectorToken(1))), 1)],
              [WeightedProgram(
-                ClickToken(LikeToken(StringToken(u"Reply"))), 1)],
+                ClickToken(LikeToken(StringToken("Reply"))), 1)],
              [WeightedProgram(
                 FocusAndTypeToken(
                     InputElementsToken(), FieldsValueSelectorToken(0)), 1)],
              [WeightedProgram(
-                 ClickToken(LikeToken(StringToken(u""))), 1)]], # TODO: Remove this hack
+                 ClickToken(LikeToken(StringToken(""))), 1)]], # TODO: Remove this hack
             "Find the email by Harmonia and reply to them with the text \"hello\".",
             Fields({"by": "Harmonia", "message": "hello"}))]
 
@@ -148,12 +148,12 @@ class EmailInboxForwardOracleProgramPolicy(LinearProgramPolicy):
             [[WeightedProgram(
                 ClickToken(LikeToken(FieldsValueSelectorToken(1))), 1)],
              [WeightedProgram(
-                ClickToken(LikeToken(StringToken(u"Forward"))), 1)],
+                ClickToken(LikeToken(StringToken("Forward"))), 1)],
              [WeightedProgram(
                 FocusAndTypeToken(
                     InputElementsToken(), FieldsValueSelectorToken(0)), 1)],
              [WeightedProgram(
-                 ClickToken(LikeToken(StringToken(u""))), 1)]], # TODO: Remove this hack
+                 ClickToken(LikeToken(StringToken(""))), 1)]], # TODO: Remove this hack
             "Find the email by Harmonia and forward that email to Eleanore.",
             Fields({"by": "Harmonia", "to": "Eleanore"}))]
 
@@ -173,14 +173,14 @@ class EmailNoScrollOracle(LinearProgramPolicy):
                         LikeToken(FieldsValueSelectorToken(0))), 1)],
                     # Forward
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"Forward"))), 1)],
+                       ClickToken(LikeToken(StringToken("Forward"))), 1)],
                     # Type name of recipient
                     [WeightedProgram(FocusAndTypeToken(
                         InputElementsToken(),
                         FieldsValueSelectorToken(2)), 1)],
                     # Send button
                     [WeightedProgram(
-                        ClickToken(LikeToken(StringToken(u""))), 1)]
+                        ClickToken(LikeToken(StringToken(""))), 1)]
                 ],
                 "Find the email by A and forward that email to B.",
                 Fields({"by": "A", "task": "forward", "to": "B"})),
@@ -195,14 +195,14 @@ class EmailNoScrollOracle(LinearProgramPolicy):
                         LikeToken(FieldsValueSelectorToken(0))), 1)],
                     # Reply
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"Reply"))), 1)],
+                       ClickToken(LikeToken(StringToken("Reply"))), 1)],
                     # Type message
                     [WeightedProgram(FocusAndTypeToken(
                         InputElementsToken(),
                         FieldsValueSelectorToken(1)), 1)],
                     # Send button
                     [WeightedProgram(
-                        ClickToken(LikeToken(StringToken(u""))), 1)]
+                        ClickToken(LikeToken(StringToken(""))), 1)]
                 ],
                 "Find the email by A and reply to them with the text \"B\".",
                 Fields({"by": "A", "message": "B", "task": "reply"})),
@@ -247,7 +247,7 @@ class SocialMediaOracle(LinearProgramPolicy):
                         classes="more")), 1)],
                     # Block
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"Block"))), 1)]
+                       ClickToken(LikeToken(StringToken("Block"))), 1)]
                 ],
                 "For the user @jess, click on the \"Block\" button.",
                 Fields({"user": "@jess", "button": "block"})),
@@ -283,7 +283,7 @@ class SocialMediaOracle(LinearProgramPolicy):
                         classes="more")), 1)],
                     # share
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"share"))), 1)]
+                       ClickToken(LikeToken(StringToken("share"))), 1)]
                 ],
                 "For the user @jess, click on the \"share\" button.",
                 Fields({"user": "@jess", "button": "share"})),
@@ -297,7 +297,7 @@ class SocialMediaOracle(LinearProgramPolicy):
                         classes="more")), 1)],
                     # copy
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"copy"))), 1)]
+                       ClickToken(LikeToken(StringToken("copy"))), 1)]
                 ],
                 "For the user @jess, click on the \"Copy\" button.",
                 Fields({"user": "@jess", "button": "copy"})),
@@ -311,7 +311,7 @@ class SocialMediaOracle(LinearProgramPolicy):
                         classes="more")), 1)],
                     # embed
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"embed"))), 1)]
+                       ClickToken(LikeToken(StringToken("embed"))), 1)]
                 ],
                 "For the user @jess, click on the \"Embed\" button.",
                 Fields({"user": "@jess", "button": "embed"})),
@@ -325,7 +325,7 @@ class SocialMediaOracle(LinearProgramPolicy):
                         classes="more")), 1)],
                     # mute
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"mute"))), 1)]
+                       ClickToken(LikeToken(StringToken("mute"))), 1)]
                 ],
                 "For the user @jess, click on the \"Mute\" button.",
                 Fields({"user": "@jess", "button": "mute"})),
@@ -339,7 +339,7 @@ class SocialMediaOracle(LinearProgramPolicy):
                         classes="more")), 1)],
                     # embed
                     [WeightedProgram(
-                       ClickToken(LikeToken(StringToken(u"report"))), 1)]
+                       ClickToken(LikeToken(StringToken("report"))), 1)]
                 ],
                 "For the user @jess, click on the \"Report\" button.",
                 Fields({"user": "@jess", "button": "report"})),
@@ -361,7 +361,7 @@ class SocialMediaOracle(LinearProgramPolicy):
 
 class ClickCheckboxesOracle(LinearProgramPolicy):
     def __init__(self, config):
-        submit = lambda: [WeightedProgram(ClickToken(LikeToken(StringToken(u"Submit"))), 1)]
+        submit = lambda: [WeightedProgram(ClickToken(LikeToken(StringToken("Submit"))), 1)]
         check_field = lambda i: [WeightedProgram(ClickToken(SameRowToken(LikeToken(FieldsValueSelectorToken(i)))), 1)]
 
         def demo(num_boxes, randomize_order):

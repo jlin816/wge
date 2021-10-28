@@ -1,11 +1,11 @@
 import json
 import logging
 import os
-from Queue import Queue
+from queue import Queue
 import sys
 import time
 import traceback
-import urlparse
+import urllib.parse
 from threading import Thread, Event
 
 import numpy as np
@@ -42,8 +42,8 @@ class MiniWoBInstance(Thread):
     FLIGHT_TASK_WIDTH = 375
     FLIGHT_TASK_HEIGHT = 667
     
-    def __init__(self, index, subdomain, seed, headless=False,
-            base_url=None, cache_state=False, threading=True,
+    def __init__(self, index, subdomain, seed, headless=True,
+            base_url=None, cache_state=False, threading=False,
             reward_processor=None, wait_ms=0., block_on_reset=True,
             refresh_freq=0, initial_mode='train'):
         """Starts a new Selenium WebDriver session.
@@ -74,20 +74,21 @@ class MiniWoBInstance(Thread):
         self.died = False
         self.index = index
         self.init_seed = repr(seed)
-        self.headless = headless
+#        self.headless = headless
+        self.headless = True
         base_url = base_url or self.DEFAULT_BASE_URL
         if subdomain.startswith('flight.'):
             assert not base_url.startswith('file://'),\
                     ('For {} domain, MINIWOB_BASE_URL cannot be file://. '
                      ' See "Run a simple server" in README').format(subdomain)
-            self.url = urlparse.urljoin(base_url,
+            self.url = urllib.parse.urljoin(base_url,
                     subdomain.replace('.', '/') + '/wrapper.html')
             self.window_width = self.FLIGHT_WINDOW_WIDTH
             self.window_height = self.FLIGHT_WINDOW_HEIGHT
             self.task_width = self.FLIGHT_TASK_WIDTH
             self.task_height = self.FLIGHT_TASK_HEIGHT
         else:
-            self.url = urlparse.urljoin(base_url,
+            self.url = urllib.parse.urljoin(base_url,
                     'miniwob/{}.html'.format(subdomain))
             self.window_width = self.WINDOW_WIDTH
             self.window_height = self.WINDOW_HEIGHT
@@ -151,16 +152,17 @@ class MiniWoBInstance(Thread):
                 'Instance {} already has a driver'.format(self.index)
         options = webdriver.ChromeOptions()
         if self.headless:
-            options.add_argument('headless')
-            options.add_argument('disable-gpu')
-            options.add_argument('no-sandbox')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')
+            options.add_argument('--disable-dev-shm-usage')
         else:
             options.add_argument('app=' + self.url)
             options.add_argument('window-size={},{}'
                     .format(self.window_width, self.window_height))
             options.add_argument('window-position={},{}'
                     .format(9000, 30 + self.index * (self.window_height + 30)))
-        self.driver = webdriver.Chrome(chrome_options=options)
+        self.driver = webdriver.Chrome(chrome_options=options, executable_path="/home/jessy/projects/web/chromedriver")
         self.driver.implicitly_wait(5)
         if self.headless:
             self.driver.get(self.url)
@@ -257,7 +259,7 @@ class MiniWoBInstance(Thread):
         #self.driver.find_element_by_id(self.SYNC_SCREEN_ID).click()
         self.driver.execute_script('core.startEpisodeReal();')
         if self.block_on_reset:
-            for _ in xrange(self.RESET_BLOCK_MAX_ATTEMPT):
+            for _ in range(self.RESET_BLOCK_MAX_ATTEMPT):
                 if self.driver.execute_script('return WOB_TASK_READY;'):
                     break
                 time.sleep(self.RESET_BLOCK_SLEEP_TIME)

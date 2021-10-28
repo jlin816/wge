@@ -71,26 +71,26 @@ def trace_diff(trace1, trace2):
     trace2_extra = set(trace2) - set(trace1)
     overlap = sorted(set(trace1) & set(trace2))
 
-    print 'trace1+: {}'.format(fmt(trace1_extra))
-    print 'trace2+: {}'.format(fmt(trace2_extra))
-    print 'overlapping keys:'
+    print('trace1+: {}'.format(fmt(trace1_extra)))
+    print('trace2+: {}'.format(fmt(trace2_extra)))
+    print('overlapping keys:')
     for key in overlap:
         same = trace1[key] == trace2[key]
         same_str = 'same' if same else 'DIFFERENT'
-        print '\t{}: {}'.format(key, same_str)
+        print('\t{}: {}'.format(key, same_str))
 
 
 def traces_diff(traces1, traces2):
     # find overlapping train_steps
     overlap = sorted(set(traces1) & set(traces2))
 
-    print 'Traces overlap on train steps: {}'.format(fmt(overlap))
+    print('Traces overlap on train steps: {}'.format(fmt(overlap)))
 
     for train_step in overlap:
-        print '-- STEP {} --'.format(train_step)
-        print 'NOTE: only comparing first episode of each trace.'
+        print('-- STEP {} --'.format(train_step))
+        print('NOTE: only comparing first episode of each trace.')
         trace_diff(traces1[train_step][0], traces2[train_step][0])
-        print
+        print()
 
 
 trace_groups_1 = load_trace_groups(args.run1)
@@ -98,5 +98,5 @@ trace_groups_2 = load_trace_groups(args.run2)
 
 
 for trace_type in TRACE_TYPES:
-    print '===== {} ====='.format(trace_type)
+    print('===== {} ====='.format(trace_type))
     traces_diff(trace_groups_1[trace_type], trace_groups_2[trace_type])

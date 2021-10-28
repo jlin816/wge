@@ -3,7 +3,7 @@
 
 import sys, os, shutil, re, argparse, json, gzip
 from codecs import open
-from itertools import izip
+
 from collections import defaultdict, Counter
 
 
@@ -19,7 +19,7 @@ def extract_email_inbox(utterance):
     for task, regex, keys in EMAIL_INBOX_PATTERNS:
         match = re.match(regex, utterance)
         if match:
-            return dict(zip(keys, match.groups()))
+            return dict(list(zip(keys, match.groups())))
     raise ValueError('Bad email-inbox utterance: {}'.format(utterance))
 
 
@@ -86,7 +86,7 @@ def main():
     outfile = args.filename.replace('.json.gz', '-fixed.json.gz')
     with gzip.open(outfile, 'w') as fout:
         json.dump(data, fout, separators=(',', ':'))
-    print >> sys.stderr, '{} -> {}'.format(args.filename, outfile)
+    print('{} -> {}'.format(args.filename, outfile), file=sys.stderr)
 
 if __name__ == '__main__':
     main()

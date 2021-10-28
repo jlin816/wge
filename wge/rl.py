@@ -21,9 +21,7 @@ class HiddenState(object):
     pass
 
 
-class Action(object):
-    __metaclass__ = ABCMeta
-
+class Action(object, metaclass=ABCMeta):
     @property
     def justification(self):
         """Return a Justification object."""
@@ -48,9 +46,7 @@ class Action(object):
         return not self.__eq__(other)
 
 
-class Trace(object):
-    __metaclass__ = ABCMeta
-
+class Trace(object, metaclass=ABCMeta):
     @abstractmethod
     def to_json_dict(self):
         raise NotImplementedError
@@ -61,9 +57,8 @@ class Trace(object):
         raise NotImplementedError()
 
 
-class Justification(Trace):
+class Justification(Trace, metaclass=ABCMeta):
     """An object containing debug information explaining why an Action was chosen by the Policy."""
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def dumps(self):
@@ -152,7 +147,7 @@ class Episode(MutableSequence):
         if t < -len(self._experiences) or t > len(self._experiences):
             raise ValueError("Index t = {} is out of bounds".format(t))
 
-        return sum(discounted_reward(experience.undiscounted_reward, i)
+        return sum(float(discounted_reward(experience.undiscounted_reward, i))
                    for i, experience in enumerate(self._experiences[t:]))
 
     def __str__(self):
@@ -179,12 +174,12 @@ class ActionScores(object):
             d (dict[Action, Variable[FloatTensor]]): a map from Actions to scalar PyTorch Variables.
             state_value (Variable[FloatTensor]): a scalar value for the state we are at
         """
-        for v in d.values():
+        for v in list(d.values()):
             assert isinstance(v, Variable)
         assert isinstance(state_value, Variable)
 
         self._vars = d
-        self._floats = {action: v.data.cpu()[0] for action, v in self._vars.items()}
+        self._floats = {action: v.data.cpu()[0] for action, v in list(self._vars.items())}
         self._state_value = state_value
 
     @property
@@ -203,10 +198,10 @@ class ActionScores(object):
     def best_action(self):
         if len(self.as_floats) == 0:
             return None
-        return max(self.as_floats.items(), key=itemgetter(1))[0]
+        return max(list(self.as_floats.items()), key=itemgetter(1))[0]
 
     def sample_action(self):
-        actions, log_probs = zip(*self.as_floats.items())
+        actions, log_probs = list(zip(*list(self.as_floats.items())))
         probs = softmax(log_probs)
         # TODO: Bring this back when the action score hack is fixed
         #if not np.isclose(total, 1.0):
@@ -227,9 +222,8 @@ class ActionScores(object):
         self._justification = j
 
 
-class Policy(Module):
+class Policy(Module, metaclass=ABCMeta):
     """A parameterized RL policy mapping states to actions."""
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def act(self, states, test=False):

@@ -1,5 +1,5 @@
 from collections import namedtuple
-from itertools import izip
+
 
 import numpy as np
 import torch
@@ -82,7 +82,7 @@ class SequenceBatch(namedtuple('SequenceBatch', ['values', 'mask']), NamedTupleL
         """
         values_list = [v.squeeze(dim=1) for v in self.values.split(1, dim=1)]
         mask_list = self.mask.split(1, dim=1)
-        return [SequenceBatchElement(v, m) for v, m in izip(values_list, mask_list)]
+        return [SequenceBatchElement(v, m) for v, m in zip(values_list, mask_list)]
 
     @classmethod
     def cat(cls, elements):

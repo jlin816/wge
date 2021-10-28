@@ -11,7 +11,7 @@ with open("logfile", "r") as f:
             if match:
                 classes.add(match.group(1))
             else:
-                print line,
+                print(line, end=' ')
 
 #for c in classes:
 #    print "\"{}\",".format(c)

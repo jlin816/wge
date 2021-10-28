@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os, shutil, re, argparse, json, time, traceback, urlparse
+import sys, os, shutil, re, argparse, json, time, traceback, urllib.parse
 from codecs import open
-from itertools import izip
+
 from collections import defaultdict, Counter
 
 from selenium import webdriver
@@ -38,16 +38,16 @@ def main():
     if args.screenshot:
         assert os.path.isdir(args.screenshot)
 
-    print 'Opening Chrome'
+    print('Opening Chrome')
     options = get_options(headless=args.headless)
     driver = webdriver.Chrome(chrome_options=options)
     driver.implicitly_wait(1)
-    url = urlparse.urljoin(args.base_url, 'click-test-2.html')
-    print 'Go to {}'.format(url)
+    url = urllib.parse.urljoin(args.base_url, 'click-test-2.html')
+    print('Go to {}'.format(url))
     driver.get(url)
 
-    for i in xrange(args.n):
-        print 'Instance {}'.format(i)
+    for i in range(args.n):
+        print('Instance {}'.format(i))
         element = WebDriverWait(driver, 3).until(
                 EC.element_to_be_clickable((By.ID, "sync-task-cover")))
         driver.find_element_by_id('sync-task-cover').click()
@@ -65,7 +65,7 @@ def main():
                 # May fail if TWO is in front of ONE!
                 traceback.print_exc()
         if not clicked:
-            print 'Attempt to click other things'
+            print('Attempt to click other things')
             for x in buttons:
                 try:
                     x.click()
@@ -73,9 +73,9 @@ def main():
                     break
                 except Exception as e:
                     traceback.print_exc()
-        print 'Cliked = {}'.format(clicked)
+        print('Cliked = {}'.format(clicked))
             
-    print 'DONE!'
+    print('DONE!')
     driver.close()
     
 

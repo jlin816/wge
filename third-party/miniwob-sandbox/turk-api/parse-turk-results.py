@@ -12,7 +12,7 @@ Demos are encoded as follows:
 
 import sys, os, shutil, re, argparse, json
 from codecs import open
-from itertools import izip
+
 from collections import defaultdict, Counter
 
 import csv, base64, zlib, glob, gzip
@@ -24,14 +24,14 @@ def parse_csv_record(record, args):
     task = record['Input.task']
     count = 0
     used = set()
-    for key, value in record.iteritems():
+    for key, value in record.items():
         m = re.match(r'^Answer\.(d\d+)$', key)
         if not m or not value:
             continue
         demo_id = m.group(1)
         if value in used:
-            print u'ERROR ({}|{}|{}): Repeated demo'.format(
-                    task, workerId, assignmentId)
+            print('ERROR ({}|{}|{}): Repeated demo'.format(
+                    task, workerId, assignmentId))
         try:
             compressed = base64.b64decode(value)
             demo = zlib.decompress(compressed)
@@ -44,12 +44,12 @@ def parse_csv_record(record, args):
             with gzip.open(os.path.join(base_dir, filename), 'w') as fout:
                 fout.write(demo)
         except Exception as e:
-            print u'ERROR ({}|{}|{}): {}'.format(
-                    task, workerId, assignmentId, e)
+            print('ERROR ({}|{}|{}): {}'.format(
+                    task, workerId, assignmentId, e))
     if count != args.demos_per_hit:
-        print u'WARNING ({}|{}|{}): Got {} != {} demos'.format(
+        print('WARNING ({}|{}|{}): Got {} != {} demos'.format(
                 task, workerId, assignmentId,
-                count, args.demos_per_hit)
+                count, args.demos_per_hit))
 
 
 def parse_json_record(record, args):
@@ -60,14 +60,14 @@ def parse_json_record(record, args):
     count = 0
     used = set()
     wtf = False
-    for key, value in record['answers'].iteritems():
+    for key, value in record['answers'].items():
         m = re.match(r'^(d\d+)$', key)
         if not m or not value:
             continue
         demo_id = m.group(1)
         if value in used:
-            print u'ERROR ({}|{}|{}): Repeated demo'.format(
-                    task, workerId, assignmentId)
+            print('ERROR ({}|{}|{}): Repeated demo'.format(
+                    task, workerId, assignmentId))
             wtf = True
         try:
             compressed = base64.b64decode(value)
@@ -81,21 +81,21 @@ def parse_json_record(record, args):
             with gzip.open(os.path.join(base_dir, filename), 'w') as fout:
                 fout.write(demo)
         except Exception as e:
-            print u'ERROR ({}|{}|{}): {}'.format(
-                    task, workerId, assignmentId, e)
+            print('ERROR ({}|{}|{}): {}'.format(
+                    task, workerId, assignmentId, e))
             wtf = True
     if count < args.demos_per_hit:
-        print u'WARNING ({}|{}|{}): Got {} != {} demos'.format(
+        print('WARNING ({}|{}|{}): Got {} != {} demos'.format(
                 task, workerId, assignmentId,
-                count, args.demos_per_hit)
+                count, args.demos_per_hit))
         wtf = True
     if status == 'Submitted':
         if wtf:
-            print '@ BAD {} {}'.format(workerId, assignmentId)
+            print('@ BAD {} {}'.format(workerId, assignmentId))
         else:
-            print '@ GOOD {} {}'.format(workerId, assignmentId)
+            print('@ GOOD {} {}'.format(workerId, assignmentId))
     else:
-        print '# {} {} {}'.format(status, workerId, assignmentId)
+        print('# {} {} {}'.format(status, workerId, assignmentId))
 
 
 def main():

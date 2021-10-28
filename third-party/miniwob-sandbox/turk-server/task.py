@@ -39,7 +39,7 @@ def record_demo():
     filename = get_filename()
     with open(os.path.join('demos', filename), 'w') as fout:
         shutil.copyfileobj(request.body, fout)
-    print 'Saved to {}'.format(filename)
+    print('Saved to {}'.format(filename))
     return filename
 
 

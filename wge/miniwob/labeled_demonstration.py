@@ -154,7 +154,7 @@ class LabeledDemonstration(object):
             # All fields tokens
             fields = env.fields
             fields_tokens = [
-                FieldsValueSelectorToken(i) for i in xrange(len(fields.keys))]
+                FieldsValueSelectorToken(i) for i in range(len(fields.keys))]
             strings += fields_tokens
 
             # TODO: Support last. Hard because it depends on the actual exec
@@ -251,27 +251,27 @@ class WeightedProgram(object):
 def _test():
     import sys
     if len(sys.argv) != 5:
-        print >> sys.stderr, 'Usage: {} TASK BASEDIR PARSER LOGFILE'.format(sys.argv[0])
+        print('Usage: {} TASK BASEDIR PARSER LOGFILE'.format(sys.argv[0]), file=sys.stderr)
         exit(1)
     from wge.miniwob.demonstrations import load_demonstrations
     assert sys.argv[4].startswith('/tmp/')      # For safety
     with open(sys.argv[4], 'w', 'utf8') as fout:
         episode_graphs = load_demonstrations(sys.argv[1], sys.argv[2], sys.argv[3], fout)
     for episode_graph in episode_graphs:
-        print '=' * 40
+        print('=' * 40)
         for raw_state in episode_graph._raw_states:
             if raw_state['action'] and raw_state['action']['timing'] == 1:
-                print raw_state['action']['type'], raw_state['action']
-        print '-' * 40
-        print 'LENGTH:', len(episode_graph)
+                print(raw_state['action']['type'], raw_state['action'])
+        print('-' * 40)
+        print('LENGTH:', len(episode_graph))
         for i, thing in enumerate(episode_graph):
-            print i, ':', thing
-        print '-' * 40
+            print(i, ':', thing)
+        print('-' * 40)
         labeled_demo = LabeledDemonstration.from_episode_graph(episode_graph)
         for i, thing in enumerate(episode_graph):
-            print i, ':', thing
+            print(i, ':', thing)
             for program in labeled_demo.programs(i):
-                print ' ', program
+                print(' ', program)
 
 if __name__ == '__main__':
     _test()

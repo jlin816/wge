@@ -152,8 +152,8 @@ class UtteranceVocab(SimpleVocab):
     An UtteranceVocab is required to have the following special tokens: UNK,
     PAD. See class attributes for more info.
     """
-    UNK = u"<unk>"
-    PAD = u"<pad>"
+    UNK = "<unk>"
+    PAD = "<pad>"
     SPECIAL_TOKENS = (UNK, PAD)
 
     def __init__(self, tokens):
@@ -175,7 +175,7 @@ class UtteranceVocab(SimpleVocab):
         try:
             return sup.word2index(w.lower())
         except KeyError:
-            logging.info(u"%s embedded as UNK", w)
+            logging.info("%s embedded as UNK", w)
             return sup.word2index(self.UNK)
 
 
@@ -276,9 +276,9 @@ class UtteranceEmbedder(CachedEmbedder):
             assert len(final_states) == len(combined_states_by_batch)
             self._cache.cache(
                 uncached_utterances,
-                zip(final_states, combined_states_by_batch))
+                list(zip(final_states, combined_states_by_batch)))
 
-        final_states, combined_states = zip(*self._cache.get(utterance))
+        final_states, combined_states = list(zip(*self._cache.get(utterance)))
         return torch.stack(final_states, 0), combined_states
 
     @property

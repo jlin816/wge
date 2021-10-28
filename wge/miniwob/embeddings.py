@@ -138,7 +138,7 @@ class DOMAlignments(Module):
             (batch_size, num_dom_elems, self._num_buckets)).astype(np.float32)
 
         # Calculate the alignment matrix between elems and fields
-        for batch_idx in xrange(len(dom_elements)):
+        for batch_idx in range(len(dom_elements)):
             for dom_idx, dom in enumerate(dom_elements[batch_idx]):
                 keys = alignment_fields[batch_idx].keys
                 vals = alignment_fields[batch_idx].values
@@ -331,7 +331,7 @@ class HigherOrderDOMElementEmbedder(Embedder):
 
         # Make the total DOM tree neighbors embed dim to be approximately the
         # base embed dim
-        projection_dim = base_embed_dim / lca_range
+        projection_dim = int(base_embed_dim / lca_range)
         self._dom_neighbor_projection = Linear(
             base_embed_dim, projection_dim)
         self._dom_neighbors_embed_dim = projection_dim * lca_range
@@ -367,7 +367,7 @@ class HigherOrderDOMElementEmbedder(Embedder):
 
         # DOM neighbors whose LCA goes from depth 3 to 6 (root is depth 1)
         dom_neighbor_embeds = []
-        for k in xrange(self._lca_depth_start, self._lca_depth_end):
+        for k in range(self._lca_depth_start, self._lca_depth_end):
             is_neighbor_fn = lambda elem1, elem2: (N.is_depth_k_lca_neighbor(
                 elem1, elem2, k, self._lca_cache) and
                                                    N.is_text_neighbor(elem1,

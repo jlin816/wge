@@ -35,7 +35,7 @@ class Stat(object):
             targets = [round(0.1 * i, 1) for i in range(-10, 11, 1)]
         elif stat_type == AVG_EP_LENGTH:
             ascending = False
-            targets = range(10)
+            targets = list(range(10))
         elif stat_type == REPLAY_BUFFER_SIZE:
             ascending = True
             # [100, 200, ..., 1000]
@@ -68,6 +68,7 @@ class Stat(object):
         self.hit_times = hit_times
 
     def add_value(self, value, train_step):
+        value = float(value) # for json serializability later, cast np.float64 -> float
         self.latest = value
         self.last_seen = train_step
 
@@ -104,7 +105,7 @@ class Stat(object):
         d = self.to_json_dict()
         # need to convert hit_times to (key, value) pairs,
         # since a float can't be a key in HOCON format
-        items = d['hit_times'].items()
+        items = list(d['hit_times'].items())
         items = sorted(items, reverse=True)
         items = [list(item) for item in items]  # json doesn't like tuples
         d['hit_times'] = items
@@ -204,7 +205,7 @@ class EpisodeLogger(object):
         raw_stats = self._compute_raw_stats(episodes)
 
         meta = self.metadata
-        for stat_type, value in raw_stats.items():
+        for stat_type, value in list(raw_stats.items()):
             # update tboard
             self.tb_logger.log_value('{}_{}'.format(label, stat_type),
                                      value=value, step=train_step)

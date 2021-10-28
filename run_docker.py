@@ -67,11 +67,11 @@ run_cmd = '{docker} run {options} {image} /bin/bash -c {command}'.format(docker=
                                                             options=' '.join(docker_args),
                                                             image=image,
                                                             command=bash_string(exec_cmd))
-print 'Data directory: {}'.format(data_dir)
-print 'Command to run inside Docker: {}'.format(args.command)
+print('Data directory: {}'.format(data_dir))
+print('Command to run inside Docker: {}'.format(args.command))
 
-print pull_cmd
-print run_cmd
+print(pull_cmd)
+print(run_cmd)
 if not args.debug:
     local(pull_cmd)
     local(run_cmd)

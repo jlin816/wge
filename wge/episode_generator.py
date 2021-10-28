@@ -11,9 +11,7 @@ from wge.miniwob.action import MiniWoBTerminate
 from wge.rl import Episode, Experience, BaseExperience, Trace, Justification
 
 
-class EpisodeGenerator(object):
-    __metaclass__ = ABCMeta
-
+class EpisodeGenerator(object, metaclass=ABCMeta):
     @abstractmethod
     def __call__(self, policy, test):
         """List of Episodes.
@@ -31,7 +29,7 @@ class EpisodeGenerator(object):
     @staticmethod
     def _get_random_seeds(n):
         """Get a random seed for each episode."""
-        return [random.randint(0, sys.maxint) for _ in xrange(n)]
+        return [random.randint(0, sys.maxsize) for _ in range(n)]
 
 
 class BasicEpisodeGenerator(EpisodeGenerator):
@@ -82,9 +80,9 @@ class BasicEpisodeGenerator(EpisodeGenerator):
                 record_screenshots=record_screenshots)
         assert not env.died, 'Environment died'
 
-        episodes = [Episode() for _ in xrange(len(states))]
+        episodes = [Episode() for _ in range(len(states))]
 
-        for step in xrange(self._max_steps_per_episode + 1):
+        for step in range(self._max_steps_per_episode + 1):
             # Give up if you've reached episode limit
             if step == self._max_steps_per_episode:
                 actions = [MiniWoBTerminate() if state is not None
@@ -102,7 +100,7 @@ class BasicEpisodeGenerator(EpisodeGenerator):
             # Update episodes
             assert len(episodes) == len(states) == len(actions) == len(rewards) == len(info['n'])
             for episode, (state, action, reward, metadata) in zip(
-                    episodes, zip(states, actions, rewards, info['n'])):
+                    episodes, list(zip(states, actions, rewards, info['n']))):
                 if action is not None:
                     episode.append(Experience(state, action, reward, metadata))
 

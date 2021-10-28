@@ -7,9 +7,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from wge.rl import Action
 
 
-class MiniWoBAction(Action):
+class MiniWoBAction(Action, metaclass=abc.ABCMeta):
     """Defines an action in its __call__ method."""
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def __call__(self, driver):

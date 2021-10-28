@@ -35,7 +35,7 @@ def load_demonstrations(task, demo_set_dir, parser='original', logfile=None,
     # realpath to resolve symlinks
     task_dir = os.path.realpath(os.path.join(demo_dir, demo_set_dir, task))
 
-    print 'LOADING DEMOS FROM: {}'.format(task_dir)
+    print('LOADING DEMOS FROM: {}'.format(task_dir))
 
     try:
         filenames = os.listdir(task_dir)
@@ -72,12 +72,17 @@ def load_demonstration(task, filename, parser, logfile=None):
         EpisodeGraph
     """
     if logfile:
-        print >> logfile, '#' * 40
-        print >> logfile, 'Reading from {} (parser={})'.format(filename, parser)
+        print('#' * 40, file=logfile)
+        print('Reading from {} (parser={})'.format(filename, parser), file=logfile)
     field_extractor = get_field_extractor(task)
     opener = gzip.open if filename.endswith('.gz') else open
-    with opener(filename, "r") as f:
-        contents = json.load(f)
+    print(opener == gzip.open)
+    print(filename)
+    with opener(filename, "rb") as f:
+        if opener == gzip.open:
+            contents = json.loads(f.read().decode("utf-8"))
+        else:
+            contents = json.load(f)
     try:
         return EpisodeGraph(contents, field_extractor, parser, logfile)
     except Exception as e:
@@ -341,7 +346,7 @@ class EpisodeGraph(collections.Sequence):
 
         # Collapse Click then FocusAndType into just FocusAndType
         collapsed_state_vertices = []
-        for index in xrange(len(state_vertices) - 1):
+        for index in range(len(state_vertices) - 1):
             curr_action = state_vertices[index].action_edges[0].action
             next_action = state_vertices[index + 1].action_edges[0].action
             if not(isinstance(curr_action, MiniWoBElementClick) and \
@@ -416,21 +421,21 @@ class EpisodeGraph(collections.Sequence):
             raw_state_pairs.append((current_before, current_before))
 
         if self._logfile:
-            print >> self._logfile, 'Utterance:', utterance
-            print >> self._logfile, 'Fields:', fields
-            print >> self._logfile, '#' * 10, 'PAIRS'
+            print('Utterance:', utterance, file=self._logfile)
+            print('Fields:', fields, file=self._logfile)
+            print('#' * 10, 'PAIRS', file=self._logfile)
             for i, (s1, s2) in enumerate(raw_state_pairs):
-                print >> self._logfile, '@', i, ':', s1['action'], s2['action']
+                print('@', i, ':', s1['action'], s2['action'], file=self._logfile)
 
         chunks = self._chunk_events(raw_state_pairs, utterance, fields)
         chunks = self._collapse_type_actions(chunks)
 
         if self._logfile:
-            print >> self._logfile, 'Utterance:', utterance
-            print >> self._logfile, 'Fields:', fields
-            print >> self._logfile, '#' * 10, 'CHUNKS'
+            print('Utterance:', utterance, file=self._logfile)
+            print('Fields:', fields, file=self._logfile)
+            print('#' * 10, 'CHUNKS', file=self._logfile)
             for i, chunk in enumerate(chunks):
-                print >> self._logfile, '@', i, ':', chunk
+                print('@', i, ':', chunk, file=self._logfile)
 
         # Create base vertices
         state_vertices = []
@@ -460,14 +465,14 @@ class EpisodeGraph(collections.Sequence):
             state_vertices.append(state_vertex)
 
         if self._logfile:
-            print >> self._logfile, '#' * 10, 'GRAPH'
+            print('#' * 10, 'GRAPH', file=self._logfile)
             for i, v in enumerate(state_vertices):
-                print >> self._logfile, '@', i, ':', v.action_edges
-                print >> self._logfile, v.state.dom.visualize()
+                print('@', i, ':', v.action_edges, file=self._logfile)
+                print(v.state.dom.visualize(), file=self._logfile)
 
         if find_shortcuts:
             if self._logfile:
-                print >> self._logfile, '#' * 10, 'SHORTCUTS'
+                print('#' * 10, 'SHORTCUTS', file=self._logfile)
             self._find_shortcuts(state_vertices)
 
         # Remove dummy edges
@@ -480,11 +485,11 @@ class EpisodeGraph(collections.Sequence):
                         ActionEdge(None, i, i + 1))
 
         if self._logfile:
-            print >> self._logfile, '#' * 10, 'FINAL'
-            print >> self._logfile, 'Utterance:', utterance
-            print >> self._logfile, 'Fields:', fields
+            print('#' * 10, 'FINAL', file=self._logfile)
+            print('Utterance:', utterance, file=self._logfile)
+            print('Fields:', fields, file=self._logfile)
             for i, v in enumerate(state_vertices):
-                print >> self._logfile, '@', i, ':', v.action_edges
+                print('@', i, ':', v.action_edges, file=self._logfile)
 
         return state_vertices
 
@@ -557,7 +562,7 @@ class EpisodeGraph(collections.Sequence):
                     if chunk:
                         chunks.append(chunk)
             elif t == 'keypress':
-                char = unichr(raw_action['charCode'])
+                char = chr(raw_action['charCode'])
                 chunks.append(Chunk('type',
                     last_keydown.state, last_keydown.target, char))
                 pending_keypresses += 1
@@ -655,7 +660,7 @@ class EpisodeGraph(collections.Sequence):
                 dom_diff = True if is_last else self._dom_diff(
                         vi.state.dom, state_vertices[i + 1].state.dom)
                 if self._logfile and (dom_diff is True or len(dom_diff) <= 5):
-                    print >> self._logfile, 'DIFF', i, ':', dom_diff
+                    print('DIFF', i, ':', dom_diff, file=self._logfile)
                 if not dom_diff:
                     vi.action_edges.append(ActionEdge(None, i, i + 1))
                 elif isinstance(action_edge, DummyActionEdge):
@@ -678,13 +683,13 @@ class EpisodeGraph(collections.Sequence):
                         if action:
                             vi.action_edges.append(ActionEdge(action, i, i + 1))
         # Multiple steps:
-        for i in xrange(len(state_vertices)):
+        for i in range(len(state_vertices)):
             vi = state_vertices[i]
-            for j in xrange(i + 2, min(i + 1 + self.MAX_SHORTCUT_LENGTH, len(state_vertices))):
+            for j in range(i + 2, min(i + 1 + self.MAX_SHORTCUT_LENGTH, len(state_vertices))):
                 vj = state_vertices[j]
                 dom_diff = self._dom_diff(vi.state.dom, vj.state.dom)
                 if self._logfile and len(dom_diff) <= 5:
-                    print >> self._logfile, 'DIFF', i, '->', j, ':', dom_diff
+                    print('DIFF', i, '->', j, ':', dom_diff, file=self._logfile)
                 if not dom_diff:
                     vi.action_edges.append(ActionEdge(None, i, j))
                 else:

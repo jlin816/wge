@@ -11,73 +11,73 @@ from wge.utils import word_tokenize
 class ProgramTester(object):
     @pytest.fixture
     def fields(self):
-        return Fields({u"key": u"value", u"key2": u"value2"})
+        return Fields({"key": "value", "key2": "value2"})
 
     @pytest.fixture
     def env(self, dom, fields):
         state = MiniWoBState(
-            u"This is the Utterance.", fields, dom)
+            "This is the Utterance.", fields, dom)
         env = ExecutionEnvironment(state)
         return env
 
     @pytest.fixture
     def dom(self):
         dom = {
-            unicode("top"): 0, unicode("height"): 210, unicode("width"): 500,
-            unicode("tag"): unicode("BODY"), unicode("ref"): 30,
-            unicode("children"):
-              [{unicode("top"): 0, unicode("height"): 210,
-                unicode("width"): 160, unicode("tag"): unicode("DIV"),
-                unicode("ref"): 31,
-                unicode("children"):
-                  [{unicode("top"): 50, unicode("height"): 4,
-                    unicode("width"): 160, unicode("tag"): unicode("DIV"),
-                    unicode("ref"): 32, unicode("children"):
-                      [{unicode("text"): unicode("ONE."), unicode("top"): 165,
-                        unicode("height"): 40, unicode("width"): 40,
-                        unicode("tag"): unicode("BUTTON"), unicode("ref"): 33,
-                        unicode("children"): [],
-                        unicode("left"): 5},
-                       {unicode("text"): unicode("TWO;"),
-                        unicode("top"): 135, unicode("height"): 40,
-                        unicode("width"): 40,
-                        unicode("tag"): unicode("BUTTON"),
-                        unicode("ref"): 34, unicode("children"): [],
-                        unicode("left"): 95},
-                       {unicode("text"): unicode("text"),
-                        unicode("top"): 0, unicode("height"): 0,
-                        unicode("width"): 0, unicode("tag"): unicode("t"),
-                        unicode("children"): [], unicode("left"): 0},
-                       {unicode("text"): unicode(""), unicode("top"): 151,
-                        unicode("value"): unicode(""), unicode("height"): 19,
-                        unicode("width"): 140,
-                        unicode("tag"): unicode("INPUT_text"),
-                        unicode("ref"): 127, unicode("children"): [],
-                        unicode("left"): 2},
-                       {unicode("text"): unicode(""), unicode("top"): 161,
-                        unicode("value"): unicode(""), unicode("height"): 19,
-                        unicode("width"): 140,
-                        unicode("tag"): unicode("INPUT_checkbox"),
-                        unicode("ref"): 128, unicode("children"): [],
-                        unicode("left"): 2},
-                       {unicode("text"): unicode(""), unicode("top"): 141,
-                        unicode("value"): unicode(""), unicode("height"): 19,
-                        unicode("width"): 140,
-                        unicode("tag"): unicode("INPUT_radio"),
-                        unicode("ref"): 129, unicode("children"): [],
-                        unicode("left"): 2},
-                       {unicode("text"): unicode("1 2 3 4 5 6"),
-                        unicode("top"): 141,
-                        unicode("value"): unicode(""), unicode("height"): 19,
-                        unicode("width"): 140,
-                        unicode("tag"): unicode("title"),
-                        unicode("ref"): 130, unicode("children"): [],
-                        unicode("left"): 2}
+            str("top"): 0, str("height"): 210, str("width"): 500,
+            str("tag"): str("BODY"), str("ref"): 30,
+            str("children"):
+              [{str("top"): 0, str("height"): 210,
+                str("width"): 160, str("tag"): str("DIV"),
+                str("ref"): 31,
+                str("children"):
+                  [{str("top"): 50, str("height"): 4,
+                    str("width"): 160, str("tag"): str("DIV"),
+                    str("ref"): 32, str("children"):
+                      [{str("text"): str("ONE."), str("top"): 165,
+                        str("height"): 40, str("width"): 40,
+                        str("tag"): str("BUTTON"), str("ref"): 33,
+                        str("children"): [],
+                        str("left"): 5},
+                       {str("text"): str("TWO;"),
+                        str("top"): 135, str("height"): 40,
+                        str("width"): 40,
+                        str("tag"): str("BUTTON"),
+                        str("ref"): 34, str("children"): [],
+                        str("left"): 95},
+                       {str("text"): str("text"),
+                        str("top"): 0, str("height"): 0,
+                        str("width"): 0, str("tag"): str("t"),
+                        str("children"): [], str("left"): 0},
+                       {str("text"): str(""), str("top"): 151,
+                        str("value"): str(""), str("height"): 19,
+                        str("width"): 140,
+                        str("tag"): str("INPUT_text"),
+                        str("ref"): 127, str("children"): [],
+                        str("left"): 2},
+                       {str("text"): str(""), str("top"): 161,
+                        str("value"): str(""), str("height"): 19,
+                        str("width"): 140,
+                        str("tag"): str("INPUT_checkbox"),
+                        str("ref"): 128, str("children"): [],
+                        str("left"): 2},
+                       {str("text"): str(""), str("top"): 141,
+                        str("value"): str(""), str("height"): 19,
+                        str("width"): 140,
+                        str("tag"): str("INPUT_radio"),
+                        str("ref"): 129, str("children"): [],
+                        str("left"): 2},
+                       {str("text"): str("1 2 3 4 5 6"),
+                        str("top"): 141,
+                        str("value"): str(""), str("height"): 19,
+                        str("width"): 140,
+                        str("tag"): str("title"),
+                        str("ref"): 130, str("children"): [],
+                        str("left"): 2}
                       ],
-                    unicode("left"): 0}
+                    str("left"): 0}
                   ],
-                unicode("left"): 0}],
-            unicode("left"): 0}
+                str("left"): 0}],
+            str("left"): 0}
         return dom
 
     @pytest.fixture
@@ -276,7 +276,7 @@ class TestClickToken(ActionTokenTester):
 
 class TestTypeToken(ActionTokenTester):
     def test_execute(self, env, fields, dom, dom_elem):
-        type_token = TypeToken(StringToken(u"Hello, world!"))
+        type_token = TypeToken(StringToken("Hello, world!"))
         type_action = type_token.execute(env)
 
         assert isinstance(type_action, type_token.return_type)
@@ -285,9 +285,9 @@ class TestTypeToken(ActionTokenTester):
         assert type_action.text == "Hello, world!"
 
     def test_consistent(self, env, dom, dom_elem):
-        type_token = TypeToken(StringToken(u"Hello, world!"))
+        type_token = TypeToken(StringToken("Hello, world!"))
 
-        assert type_token.consistent(env, MiniWoBType(u"Hello, world!"))
+        assert type_token.consistent(env, MiniWoBType("Hello, world!"))
         # Test compatibility with non-unicode
         assert type_token.consistent(env, MiniWoBType("Hello, world!"))
         # Check is sensitive to punctuation
@@ -315,7 +315,7 @@ class TestFocusAndTypeToken(ActionTokenTester):
 
         text_returner = MockReturnElementSet(text_elem)
         type_token = FocusAndTypeToken(
-                text_returner, StringToken(u"Hello, world!"))
+                text_returner, StringToken("Hello, world!"))
         type_action = type_token.execute(env)
 
         assert isinstance(type_action, type_token.return_type)
@@ -331,7 +331,7 @@ class TestFocusAndTypeToken(ActionTokenTester):
 
         text_returner = MockReturnElementSet(text_elem)
         type_token = FocusAndTypeToken(
-                text_returner, StringToken(u"Hello, world!"))
+                text_returner, StringToken("Hello, world!"))
         type_action = MiniWoBFocusAndType(text_elem, "Hello, world!")
 
         # Check that you are consistent
@@ -352,19 +352,19 @@ class TestFocusAndTypeToken(ActionTokenTester):
 class TestStringToken(TokenTester):
     def test_execute(self, env, fields, dom, dom_elem):
         # Test empty string
-        s = StringToken(u"")
+        s = StringToken("")
         result = s.execute(env)
 
         assert isinstance(result, s.return_type)
-        assert isinstance(result, unicode)
+        assert isinstance(result, str)
         assert result == ""
 
         # Test non-empty string
-        s = StringToken(u"Hello, world!")
+        s = StringToken("Hello, world!")
         result = s.execute(env)
 
         assert isinstance(result, s.return_type)
-        assert isinstance(result, unicode)
+        assert isinstance(result, str)
         assert result == "Hello, world!"
 
         # Test non-unicode
@@ -388,14 +388,14 @@ class TestFieldsValueSelectorToken(TokenTester):
         result = selector.execute(env)
 
         assert isinstance(result, selector.return_type)
-        assert isinstance(result, unicode)
+        assert isinstance(result, str)
         assert result == "value"
 
         selector = FieldsValueSelectorToken(1)
         result = selector.execute(env)
 
         assert isinstance(result, selector.return_type)
-        assert isinstance(result, unicode)
+        assert isinstance(result, str)
         assert result == "value2"
 
 
@@ -430,7 +430,7 @@ class TestUtteranceSelectorToken(TokenTester):
         result = selector.execute(env)
 
         assert isinstance(result, selector.return_type)
-        assert isinstance(result, unicode)
+        assert isinstance(result, str)
         assert result == "the Utterance"
 
         # Length 1
@@ -438,7 +438,7 @@ class TestUtteranceSelectorToken(TokenTester):
         result = selector.execute(env)
 
         assert isinstance(result, selector.return_type)
-        assert isinstance(result, unicode)
+        assert isinstance(result, str)
         assert result == "This"
 
         # Check funky period spacing
@@ -446,7 +446,7 @@ class TestUtteranceSelectorToken(TokenTester):
         result = selector.execute(env)
 
         assert isinstance(result, selector.return_type)
-        assert isinstance(result, unicode)
+        assert isinstance(result, str)
         assert result == "Utterance."
 
 
@@ -476,10 +476,10 @@ class TestSingleElementsSelectorToken(TokenTester):
         # Reset DOM
         env.set_last(dom_elem)
         new_dom = {
-            unicode("top"): 0, unicode("height"): 210, unicode("width"): 500,
-            unicode("tag"): unicode("BODY"), unicode("ref"): 30,
-            unicode("children"): [],
-            unicode("left"): 0
+            str("top"): 0, str("height"): 210, str("width"): 500,
+            str("tag"): str("BODY"), str("ref"): 30,
+            str("children"): [],
+            str("left"): 0
         }
         new_state = MiniWoBState("new utterance", None, new_dom)
         env.observe(new_state)
@@ -517,26 +517,26 @@ class DistanceTokenTester(TokenTester):
     @pytest.fixture
     def dom(self):
         dom = {
-            unicode("top"): 0, unicode("height"): 0, unicode("width"): 0,
-            unicode("tag"): unicode("BODY"), unicode("ref"): 0,
-            unicode("left"): 0, unicode("children"): [
+            str("top"): 0, str("height"): 0, str("width"): 0,
+            str("tag"): str("BODY"), str("ref"): 0,
+            str("left"): 0, str("children"): [
                 {
-                    unicode("top"): 100, unicode("left"): 100,
-                    unicode("height"): 5, unicode("width"): 5,
-                    unicode("ref"): 1, unicode("tag"): unicode("BUTTON"),
-                    unicode("text"): unicode("ONE"), unicode("children"): []
+                    str("top"): 100, str("left"): 100,
+                    str("height"): 5, str("width"): 5,
+                    str("ref"): 1, str("tag"): str("BUTTON"),
+                    str("text"): str("ONE"), str("children"): []
                 },
                 {
-                    unicode("top"): 0, unicode("left"): 210,
-                    unicode("height"): 5, unicode("width"): 5,
-                    unicode("ref"): 2, unicode("tag"): unicode("BUTTON"),
-                    unicode("text"): unicode("TWO"), unicode("children"): []
+                    str("top"): 0, str("left"): 210,
+                    str("height"): 5, str("width"): 5,
+                    str("ref"): 2, str("tag"): str("BUTTON"),
+                    str("text"): str("TWO"), str("children"): []
                 },
                 {
-                    unicode("top"): 0, unicode("left"): 0,
-                    unicode("height"): 5, unicode("width"): 5,
-                    unicode("ref"): 3, unicode("tag"): unicode("BUTTON"),
-                    unicode("text"): unicode("THREE"), unicode("children"): []
+                    str("top"): 0, str("left"): 0,
+                    str("height"): 5, str("width"): 5,
+                    str("ref"): 3, str("tag"): str("BUTTON"),
+                    str("text"): str("THREE"), str("children"): []
                 }
             ]
         }
@@ -693,26 +693,26 @@ class TestNearToken(TokenTester):
     def test_execute(self, env, fields, dom, dom_elem):
         # Three button simple DOM
         dom = {
-            unicode("top"): 0, unicode("height"): 0, unicode("width"): 0,
-            unicode("tag"): unicode("BODY"), unicode("ref"): 0,
-            unicode("left"): 0, unicode("children"): [
+            str("top"): 0, str("height"): 0, str("width"): 0,
+            str("tag"): str("BODY"), str("ref"): 0,
+            str("left"): 0, str("children"): [
                 {
-                    unicode("top"): 100, unicode("left"): 100,
-                    unicode("height"): 5, unicode("width"): 5,
-                    unicode("ref"): 1, unicode("tag"): unicode("BUTTON"),
-                    unicode("text"): unicode("ONE"), unicode("children"): []
+                    str("top"): 100, str("left"): 100,
+                    str("height"): 5, str("width"): 5,
+                    str("ref"): 1, str("tag"): str("BUTTON"),
+                    str("text"): str("ONE"), str("children"): []
                 },
                 {
-                    unicode("top"): 0, unicode("left"): 210,
-                    unicode("height"): 5, unicode("width"): 5,
-                    unicode("ref"): 2, unicode("tag"): unicode("BUTTON"),
-                    unicode("text"): unicode("TWO"), unicode("children"): []
+                    str("top"): 0, str("left"): 210,
+                    str("height"): 5, str("width"): 5,
+                    str("ref"): 2, str("tag"): str("BUTTON"),
+                    str("text"): str("TWO"), str("children"): []
                 },
                 {
-                    unicode("top"): 0, unicode("left"): 0,
-                    unicode("height"): 5, unicode("width"): 5,
-                    unicode("ref"): 3, unicode("tag"): unicode("BUTTON"),
-                    unicode("text"): unicode("THREE"), unicode("children"): []
+                    str("top"): 0, str("left"): 0,
+                    str("height"): 5, str("width"): 5,
+                    str("ref"): 3, str("tag"): str("BUTTON"),
+                    str("text"): str("THREE"), str("children"): []
                 }
             ]
         }
@@ -812,7 +812,7 @@ class TestNearToken(TokenTester):
 class TestLikeToken(TokenTester):
     def test_execute(self, env, fields, dom, dom_elem):
         # Test from StringToken
-        like = LikeToken(StringToken(u"ONE"))
+        like = LikeToken(StringToken("ONE"))
         result = like.execute(env)
 
         assert isinstance(result, like.return_type)
@@ -834,7 +834,7 @@ class TestLikeToken(TokenTester):
         assert result[0].text == "TWO;"
 
         # Test return none
-        like = LikeToken(StringToken(u"abcd"))
+        like = LikeToken(StringToken("abcd"))
         result = like.execute(env)
 
         assert isinstance(result, like.return_type)
@@ -842,7 +842,7 @@ class TestLikeToken(TokenTester):
         assert len(result) == 0
 
         # Test punctuation and whitespace
-        like = LikeToken(StringToken(u"T ?W O ."))
+        like = LikeToken(StringToken("T ?W O ."))
         result = like.execute(env)
 
         assert isinstance(result, like.return_type)

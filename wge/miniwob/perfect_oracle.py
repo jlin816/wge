@@ -55,9 +55,8 @@ class PerfectOracle(Policy):
         return False
 
 
-class ActionPlayer(object):
+class ActionPlayer(object, metaclass=abc.ABCMeta):
     """For each state, defines the next action."""
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def next_action(self, state):
@@ -255,7 +254,7 @@ class ChooseDatePlayer(ActionPlayer):
     SUBMIT_REF = 6
     def __init__(self, months=None):
         if months is None:
-            months = set(xrange(1, 13))
+            months = set(range(1, 13))
         self._months = months
         self._phase = ChooseDatePhase.OPEN_DATEPICKER
 
@@ -294,7 +293,7 @@ class ChooseDatePlayer(ActionPlayer):
             months = ["January", "February", "March", "April", "May", "June",
                       "July", "August", "September", "October", "November",
                       "December"]
-            d = dict(zip(months, xrange(1, 13)))
+            d = dict(list(zip(months, list(range(1, 13)))))
             return d[month]
 
         for elem in state.dom_elements:

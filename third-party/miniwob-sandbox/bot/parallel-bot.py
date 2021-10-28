@@ -3,7 +3,7 @@
 
 import sys, os, shutil, re, argparse, json
 from codecs import open
-from itertools import izip
+
 from collections import defaultdict, Counter
 
 from selenium import webdriver
@@ -16,14 +16,14 @@ def main():
     args = parser.parse_args()
 
     drivers = []
-    for i in xrange(5):
+    for i in range(5):
         drivers.append(webdriver.Remote(
             desired_capabilities={'browserName': 'chrome'}))
-    print 'Created 5 drivers'
+    print('Created 5 drivers')
 
     for driver in drivers:
         driver.get("https://github.com")
-        print(driver.title)
+        print((driver.title))
         assert "GitHub" in driver.title
 
     for driver in drivers:

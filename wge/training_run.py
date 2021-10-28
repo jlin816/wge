@@ -57,7 +57,7 @@ class MiniWoBTrainingRun(TorchTrainingRun):
         Episode.configure(config.discount_negative_reward)
         env = Environment.make(config.env.domain, config.env.subdomain)  # TODO: Refactor into a get_environment
         env.configure(
-            num_instances=config.env.num_instances, seeds=range(config.env.num_instances), headless=config.env.headless,
+            num_instances=config.env.num_instances, seeds=list(range(config.env.num_instances)), headless=config.env.headless,
             base_url=os.environ.get("MINIWOB_BASE_URL"),
             cache_state=False,  # never cache state
             reward_processor=get_reward_processor(config.env.reward_processor),
@@ -175,7 +175,7 @@ class MiniWoBTrainingRun(TorchTrainingRun):
         # switches to False once pretraining starts to overfit
         # (best_bc_reward begins to drop)
 
-        for control_step in tqdm(xrange(config.train.max_control_steps), desc='Outer training loop'):
+        for control_step in tqdm(list(range(config.train.max_control_steps)), desc='Outer training loop'):
 
             # plot number of grad steps taken against control steps
             # - control_step is used to determine the timing of various events
@@ -249,8 +249,8 @@ class MiniWoBTrainingRun(TorchTrainingRun):
 
                 if pretraining_stage:
                     if avg_reward_train > best_avg_reward_train:
-                        print 'PRE-TRAINING -- new high at step {}: {:.2f}'.format(
-                            control_step, avg_reward_train)
+                        print(('PRE-TRAINING -- new high at step {}: {:.2f}'.format(
+                            control_step, avg_reward_train)))
 
                         self.metadata['stats.best_avg_reward_train_bc.value'] = avg_reward_train
                         self.metadata['stats.best_avg_reward_train_bc.hit_time'] = control_step
@@ -264,8 +264,8 @@ class MiniWoBTrainingRun(TorchTrainingRun):
                         best_bc_ckpt = self.train_state.train_steps
 
                     elif avg_reward_train <= best_avg_reward_train:
-                        print 'PRE-TRAINING -- overfit at step {}: {:.2f} (best={:.2f})'.format(
-                            control_step, avg_reward_train, best_avg_reward_train)
+                        print(('PRE-TRAINING -- overfit at step {}: {:.2f} (best={:.2f})'.format(
+                            control_step, avg_reward_train, best_avg_reward_train)))
 
                         # if latest reward is worse than best, stop pretraining
                         pretraining_stage = False
@@ -293,7 +293,7 @@ class MiniWoBTrainingRun(TorchTrainingRun):
 
             # save neural policy
             if control_step % config.log.save == 0 and control_step != 0:
-                print 'Saving checkpoint'
+                print('Saving checkpoint')
                 self.checkpoints.save(self.train_state)
 
 
@@ -333,10 +333,10 @@ class MiniWoBTrainingRun(TorchTrainingRun):
             avg_return (float)
         """
         num_instances = self._env.num_instances
-        eval_iters = num_episodes / num_instances
-        all_seeds = range(1, eval_iters * num_instances + 1)  # [1, 2, 3, ...]
+        eval_iters = int(num_episodes / num_instances)
+        all_seeds = list(range(1, eval_iters * num_instances + 1))  # [1, 2, 3, ...]
         episodes = []
-        for _ in tqdm(xrange(eval_iters), desc="Evaluating policy"):
+        for _ in tqdm(list(range(eval_iters)), desc="Evaluating policy"):
             seeds = [all_seeds.pop() for _ in range(num_instances)]
 
             # use different seeds for testing
@@ -373,7 +373,7 @@ class MiniWoBTrainingRun(TorchTrainingRun):
         take_grad_step = lambda loss: self._take_grad_step(self.train_state, loss)
 
         progress_msg = "Replaying Episodes (buffer size {})".format(buff_size)
-        for _ in tqdm(xrange(self._replay_steps), desc=progress_msg):
+        for _ in tqdm(list(range(self._replay_steps)), desc=progress_msg):
             replay_loss, replay_trace = policy.update_from_replay_buffer(
                 self._replay_buffer, self._gamma, take_grad_step)
 

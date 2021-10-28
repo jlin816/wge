@@ -3,21 +3,21 @@
 
 import sys, os, shutil, re, argparse, json, csv, random, unicodedata
 from codecs import open
-from itertools import izip
+
 from collections import defaultdict, Counter, OrderedDict
 
 
 def clean_text(x):
     # screw non-ascii characters
-    if not isinstance(x, unicode):
+    if not isinstance(x, str):
         x = x.decode('utf8', errors='ignore')
     # Remove diacritics
     x = ''.join(c for c in unicodedata.normalize('NFKD', x)
                 if unicodedata.category(c) != 'Mn')
     # Normalize quotes and dashes
-    x = re.sub(ur"[‘’´`]", "'", x)
-    x = re.sub(ur"[“”]", "\"", x)
-    x = re.sub(ur"[‐‑‒–—−]", "-", x)
+    x = re.sub(r"[‘’´`]", "'", x)
+    x = re.sub(r"[“”]", "\"", x)
+    x = re.sub(r"[‐‑‒–—−]", "-", x)
     x = re.sub(r'\s+', ' ', x).strip()
     x = str(x)
     return x
@@ -25,7 +25,7 @@ def clean_text(x):
 
 def parse_csv_record(record, storage):
     task = record['Input.task']
-    for key, value in record.iteritems():
+    for key, value in record.items():
         m = re.match(r'^Answer\.(a\d+)$', key)
         if not m or not value or value == '{}':
             continue
@@ -80,11 +80,11 @@ def main():
             reader = csv.DictReader(fin)
             for record in reader:
                 parse_csv_record(record, storage)
-    print >> sys.stderr, 'Read {} records'.format(
-            sum(len(values) for values in storage.values()))
+    print('Read {} records'.format(
+            sum(len(values) for values in list(storage.values()))), file=sys.stderr)
 
     all_templates = defaultdict(set)
-    for key, values in storage.iteritems():
+    for key, values in storage.items():
         task = parse_task(key)
         for value in values:
             abstracted = value
@@ -105,7 +105,7 @@ def main():
 
     # Create a JS file
     output = {}
-    for task, templates in all_templates.iteritems():
+    for task, templates in all_templates.items():
         templates = list(templates)
         random.shuffle(templates)
         num_trains = int(len(templates) * args.split_size)
@@ -113,9 +113,9 @@ def main():
             ('train', sorted(templates[:num_trains])),
             ('test', sorted(templates[num_trains:])),
             ])
-        print >> sys.stderr, '{}: {} trains, {} test'.format(
-                task, num_trains, len(templates) - num_trains)
-    print 'var TEMPLATES =', json.dumps(output, indent=2, separators=(',', ':')) + ';'
+        print('{}: {} trains, {} test'.format(
+                task, num_trains, len(templates) - num_trains), file=sys.stderr)
+    print('var TEMPLATES =', json.dumps(output, indent=2, separators=(',', ':')) + ';')
     
 
 if __name__ == '__main__':

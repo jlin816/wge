@@ -3,7 +3,7 @@
 
 import sys, os, shutil, argparse, re, json, traceback
 from codecs import open
-from ConfigParser import RawConfigParser
+from configparser import RawConfigParser
 from collections import defaultdict
 
 import boto
@@ -64,10 +64,10 @@ class MTurkWrapper(object):
 
     def load(self):
         if self.sandbox:
-            print "Using SANDBOX ..."
+            print("Using SANDBOX ...")
             self.mtc = boto.connect_mturk(host=MTurkWrapper.SANDBOX)
         else:
-            print "Using REAL MTURK!"
+            print("Using REAL MTURK!")
             self.mtc = boto.connect_mturk()
 
     def get_account_balance(self):
@@ -76,7 +76,7 @@ class MTurkWrapper(object):
     ################ CREATE HIT ################
 
     def _replace_variables(self, s, variables):
-        for key, value in variables.iteritems():
+        for key, value in variables.items():
             s = re.sub(r'\$\{' + key + r'\}', str(value), s, flags=re.I)
         assert '${' not in s, s
         return s
@@ -90,7 +90,7 @@ class MTurkWrapper(object):
         '''
         if maxhits:
             variables_list = variables_list[:maxhits]
-        if raw_input('Creating %d HITs. Continue? (y/N) '
+        if input('Creating %d HITs. Continue? (y/N) '
                      % len(variables_list)).lower() != 'y':
             return
         # Register the HIT type
@@ -116,8 +116,8 @@ class MTurkWrapper(object):
             else:
                 max_assignments = properties['assignments'][i]
             if max_assignments <= 0:
-                print '(%5d/%5d)' % (i + 1, len(variables_list)),
-                print 'Skipped because assignments <= 0'
+                print('(%5d/%5d)' % (i + 1, len(variables_list)), end=' ')
+                print('Skipped because assignments <= 0')
                 continue
             result = self.mtc.create_hit(
                 hit_type=hit_type_id, question=question,
@@ -126,29 +126,29 @@ class MTurkWrapper(object):
             hit_id = result[0].HITId
             hit_ids.append(hit_id)
             assert hit_type_id == result[0].HITTypeId
-            print '(%5d/%5d)' % (i + 1, len(variables_list)),
-            print 'Created HIT', hit_id
-        print ('DONE! %d HITs created. Preview the HITs here:'
-               % len(variables_list))
+            print('(%5d/%5d)' % (i + 1, len(variables_list)), end=' ')
+            print('Created HIT', hit_id)
+        print(('DONE! %d HITs created. Preview the HITs here:'
+               % len(variables_list)))
         if self.sandbox:
-            print MTurkWrapper.PREVIEW_SANDBOX + hit_type_id
+            print(MTurkWrapper.PREVIEW_SANDBOX + hit_type_id)
         else:
-            print MTurkWrapper.PREVIEW_REAL + hit_type_id
+            print(MTurkWrapper.PREVIEW_REAL + hit_type_id)
         return hit_ids, hit_type_id
         
     def extend_batch(self, hit_ids, assignments_increment=None,
                      expiration_increment=None):
         '''Extend a batch of HITs.'''
-        print 'Extending batch ...'
-        print 'Assignment +=', assignments_increment
-        print 'Expiration +=', expiration_increment
+        print('Extending batch ...')
+        print('Assignment +=', assignments_increment)
+        print('Expiration +=', expiration_increment)
         for i, hit_id in enumerate(hit_ids):
             self.mtc.extend_hit(hit_id,
                                 assignments_increment=assignments_increment,
                                 expiration_increment=expiration_increment)
-            print '(%5d/%5d)' % (i + 1, len(hit_ids)),
-            print 'Extended', hit_id
-        print 'Done!'
+            print('(%5d/%5d)' % (i + 1, len(hit_ids)), end=' ')
+            print('Extended', hit_id)
+        print('Done!')
 
     ################ GET RESULTS ################
 
@@ -161,7 +161,7 @@ class MTurkWrapper(object):
         - 'Rejected'
         - 'Approved,Rejected' (either approved or rejected)
         '''
-        print 'Getting submitted assignments ...'
+        print('Getting submitted assignments ...')
         assignments = []
         total_max_assignments = 0
         for i, hit_id in enumerate(hit_ids):
@@ -169,10 +169,10 @@ class MTurkWrapper(object):
             hit = self.mtc.get_hit(hit_id)[0]
             max_assignments = int(hit.MaxAssignments)
             total_max_assignments += max_assignments
-            print '(%5d/%5d)' % (i + 1, len(hit_ids)),
-            print hit_id, ':', result_set.NumResults, '/', max_assignments, 'assignments'
+            print('(%5d/%5d)' % (i + 1, len(hit_ids)), end=' ')
+            print(hit_id, ':', result_set.NumResults, '/', max_assignments, 'assignments')
             assignments.extend(result_set)
-        print 'DONE! %d / %d assignments retrieved.' % (len(assignments), total_max_assignments)
+        print('DONE! %d / %d assignments retrieved.' % (len(assignments), total_max_assignments))
         return assignments
 
     ################ APPROVE / REJECT ################
@@ -187,7 +187,7 @@ class MTurkWrapper(object):
         if isinstance(mapping, (list, tuple)):
             return [(x, None) for x in mapping]
         elif isinstance(mapping, dict):
-            items = mapping.items()
+            items = list(mapping.items())
             if isinstance(items[0][1], (list, tuple)):
                 return [(x, reason) for (reason, ids) in items for x in ids]
             else:
@@ -196,43 +196,43 @@ class MTurkWrapper(object):
 
     def approve_assignments(self, mapping):
         mapping = self._read_mapping(mapping)
-        if raw_input('Approving %d assignments. Continue? (y/N) '
+        if input('Approving %d assignments. Continue? (y/N) '
                      % len(mapping)).lower() != 'y':
             return
         for assignment_id, reason in mapping:
             try:
                 self.mtc.approve_assignment(assignment_id, reason)
-                print 'Approved %s (%s)' % (assignment_id, reason)
-            except Exception, e:
-                print e
+                print('Approved %s (%s)' % (assignment_id, reason))
+            except Exception as e:
+                print(e)
 
     def reject_assignments(self, mapping):
         mapping = self._read_mapping(mapping)
-        if raw_input('Rejecting %d assignments. Continue? (y/N) '
+        if input('Rejecting %d assignments. Continue? (y/N) '
                      % len(mapping)).lower() != 'y':
             return
         for assignment_id, reason in mapping:
             self.mtc.reject_assignment(assignment_id, reason)
-            print 'Rejected %s (%s)' % (assignment_id, reason)
+            print('Rejected %s (%s)' % (assignment_id, reason))
 
     def approve_rejected_assignments(self, mapping):
         mapping = self._read_mapping(mapping)
-        if raw_input('Resurrecting %d assignments. Continue? (y/N) '
+        if input('Resurrecting %d assignments. Continue? (y/N) '
                      % len(mapping)).lower() != 'y':
             return
         for assignment_id, reason in mapping:
             self.mtc.approve_rejected_assignment(assignment_id, reason)
-            print 'Resurrected %s (%s)' % (assignment_id, reason)
+            print('Resurrected %s (%s)' % (assignment_id, reason))
 
     def grant_bonus(self, data):
         '''data = list of (worker_id, assignment_id, bonus_amount, reason)'''
-        if raw_input('Granting bonus to %d Turkers. Continue? (y/N) '
+        if input('Granting bonus to %d Turkers. Continue? (y/N) '
                      % len(data)).lower() != 'y':
             return
         for worker_id, assignment_id, bonus_amount, reason in data:
             bonus_amount = Price(float(bonus_amount))
             self.mtc.grant_bonus(worker_id, assignment_id, bonus_amount, reason)
-            print 'Granted %s to %s (%s)' % (bonus_amount, worker_id, reason)
+            print('Granted %s to %s (%s)' % (bonus_amount, worker_id, reason))
 
     def block_workers(self, mapping):
         mapping = self._read_mapping(mapping)
@@ -251,47 +251,47 @@ class MTurkWrapper(object):
           expire the HIT, approve the remaining assignments, and 
           re-dispose the HIT.
         '''
-        if raw_input('Deleting %d HITs. Continue? (y/N) '
+        if input('Deleting %d HITs. Continue? (y/N) '
                      % len(hit_ids)).lower() != 'y':
             return
         for i, hit_id in enumerate(hit_ids):
             status = self.mtc.get_hit(hit_id)[0].HITStatus
             if status == 'Disposed':
-                print '(%5d/%5d)' % (i + 1, len(hit_ids)),
-                print 'HIT', hit_id, 'already disposed.'
+                print('(%5d/%5d)' % (i + 1, len(hit_ids)), end=' ')
+                print('HIT', hit_id, 'already disposed.')
                 continue
             try:
                 self.mtc.dispose_hit(hit_id)
-                print '(%5d/%5d)' % (i + 1, len(hit_ids)),
-                print 'Disposed HIT', hit_id
-            except MTurkRequestError, e:
-                print 'Trying to dispose HIT', hit_id, '...'
+                print('(%5d/%5d)' % (i + 1, len(hit_ids)), end=' ')
+                print('Disposed HIT', hit_id)
+            except MTurkRequestError as e:
+                print('Trying to dispose HIT', hit_id, '...')
                 try:
                     self.mtc.expire_hit(hit_id)
                     result_set = self.mtc.get_assignments(
                         hit_id, 'Submitted', page_size=100)
                     if len(result_set) > 0:
-                        print 'Approving %d assignments ...' % len(result_set)
+                        print('Approving %d assignments ...' % len(result_set))
                     for assignment in result_set:
                         self.mtc.approve_assignment(assignment.AssignmentId)
                     self.mtc.dispose_hit(hit_id)
-                    print '(%5d/%5d)' % (i + 1, len(hit_ids)),
-                    print 'Disposed HIT', hit_id
-                except MTurkRequestError, e:
+                    print('(%5d/%5d)' % (i + 1, len(hit_ids)), end=' ')
+                    print('Disposed HIT', hit_id)
+                except MTurkRequestError as e:
                     traceback.print_exc()
                     exit(1)
-        print 'DONE! %d HITs disposed.' % len(hit_ids)
+        print('DONE! %d HITs disposed.' % len(hit_ids))
 
     def early_expire_hits(self, hit_ids):
         '''Expire several HITs'''
-        if raw_input('Expiring %d HITs. Continue? (y/N) '
+        if input('Expiring %d HITs. Continue? (y/N) '
                      % len(hit_ids)).lower() != 'y':
             return
         for i, hit_id in enumerate(hit_ids):
             self.mtc.expire_hit(hit_id)
-            print '(%5d/%5d)' % (i + 1, len(hit_ids)),
-            print 'Expired HIT', hit_id
-        print 'DONE! %d HITs expired.' % len(hit_ids)
+            print('(%5d/%5d)' % (i + 1, len(hit_ids)), end=' ')
+            print('Expired HIT', hit_id)
+        print('DONE! %d HITs expired.' % len(hit_ids))
 
     def dispose_batch(self, hit_ids):
         '''Dispose HITs such that
@@ -319,7 +319,7 @@ class MTurkWrapper(object):
     def get_all_hits(self):
         '''Return the list of all (HIT id, HIT type id)'''
         for x in self.mtc.get_all_hits():
-            print '%s\t%s' % (x.HITId, x.HITTypeId)
+            print('%s\t%s' % (x.HITId, x.HITTypeId))
 
 ################################################################
 
@@ -332,7 +332,7 @@ class RecordWrapper(object):
     def _get_filename(self, extension, check=False):
         filename = os.path.join(self.basedir, self.dirname + '.' + extension)
         if check and os.path.exists(filename):
-            confirm = raw_input('%s exists. Overwrite? (Yes/No/Rename) ' % filename)
+            confirm = input('%s exists. Overwrite? (Yes/No/Rename) ' % filename)
             if confirm.lower() == 'r':
                 suffix = 0
                 while os.path.exists(filename + '.conflict.' + str(suffix)):
@@ -404,22 +404,22 @@ class RecordWrapper(object):
         n = parser.getint('input', 'numhits')
         if isinstance(properties['assignments'], list):
             assert len(properties['assignments']) == n, (len(properties['assignments']), n)
-        variables_list = [dict() for i in xrange(n)]
+        variables_list = [dict() for i in range(n)]
         for key in parser.options('input'):
             if key != 'numhits':
                 value = parser.get('input', key)
                 if value[0] == '[':
                     value = json.loads(value)
                     assert len(value) == n
-                    for i in xrange(n):
+                    for i in range(n):
                         variables_list[i][key] = value[i]
                 elif '-' in value:
                     start, end = [int(x) for x in value.split('-')]
                     assert end - start + 1 == n
-                    for i in xrange(n):
+                    for i in range(n):
                         variables_list[i][key] = start + i
                 else:
-                    for i in xrange(n):
+                    for i in range(n):
                         variables_list[i][key] = value
         return properties, variables_list
 
@@ -430,21 +430,21 @@ class RecordWrapper(object):
 
     def read_increments(self):
         '''Return (assignments_increment, expiration_increment)'''
-        a_i = raw_input('Assignment increment: ')
+        a_i = input('Assignment increment: ')
         try:
             a_i = int(a_i) or None
         except:
-            print 'Invalid input "%s". Set to None.' % a_i
+            print('Invalid input "%s". Set to None.' % a_i)
             a_i = None
-        e_i = raw_input('Expiration increment: ')
+        e_i = input('Expiration increment: ')
         try:
             e_i = self._parse_time(e_i) or None
         except:
-            print 'Invalid input "%s". Set to None.' % e_i
+            print('Invalid input "%s". Set to None.' % e_i)
             e_i = None
-        print '>>> Assignment +=', a_i
-        print '>>> Expiration +=', e_i
-        if raw_input('Is this OK? (Yes/No) ').lower()[:1] == 'y':
+        print('>>> Assignment +=', a_i)
+        print('>>> Expiration +=', e_i)
+        if input('Is this OK? (Yes/No) ').lower()[:1] == 'y':
             return (a_i, e_i)
         return self.read_increments()
 
@@ -453,9 +453,9 @@ class RecordWrapper(object):
         if not filename:
             return
         with open(filename, 'w', 'utf8') as fout:
-            print >> fout, '\t'.join(('hitId', 'hitTypeId'))
+            print('\t'.join(('hitId', 'hitTypeId')), file=fout)
             for hit_id in hit_ids:
-                print >> fout, '\t'.join((hit_id, hit_type_id))
+                print('\t'.join((hit_id, hit_type_id)), file=fout)
 
     def read_success(self):
         '''Return HIT IDs'''
@@ -494,10 +494,10 @@ class RecordWrapper(object):
         with open(filename, 'w', 'utf8') as fout:
             json.dump(records, fout, ensure_ascii=False, indent=2,
                       separators=(',', ': '), sort_keys=True)
-        print ('Wrote %d records to %s' % (len(records), filename))
-        for key, value in statistics.iteritems():
-            print '%12s: %6d / %6d (%8.3f%%)' % (key, value, len(records),
-                                                 value * 100.0 / len(records))
+        print(('Wrote %d records to %s' % (len(records), filename)))
+        for key, value in statistics.items():
+            print('%12s: %6d / %6d (%8.3f%%)' % (key, value, len(records),
+                                                 value * 100.0 / len(records)))
 
     def read_results(self):
         '''Return a list of {'metadata': {...}, 'answers': {...}}'''
@@ -571,7 +571,7 @@ class Actions(object):
         To get real MTurk balance, add the --real flag.
         """
         self.mturk_w.load()
-        print self.mturk_w.get_account_balance()
+        print(self.mturk_w.get_account_balance())
 
     def create(self, args):
         """ Create a batch of HITs.
@@ -585,10 +585,10 @@ class Actions(object):
         Otherwise it is pretty difficult to fix the error.
         """
         properties, variables_list = self.record_w.read_config()
-        print '=' * 40
+        print('=' * 40)
         for key in sorted(properties):
-            print key, ':', properties[key]
-        print '=' * 40
+            print(key, ':', properties[key])
+        print('=' * 40)
         self.mturk_w.load()
         response = self.mturk_w.create_batch(
             properties, variables_list, maxhits=args.maxhits)
@@ -652,26 +652,26 @@ class Actions(object):
         mapping_rej = self.record_w.read_reject()
         mapping_app = self.record_w.read_approve()
         if not (mapping_rej or mapping_app):
-            print 'Nothing to reject or approve.'
+            print('Nothing to reject or approve.')
             exit(0)
         i = 1
         while os.path.exists(self.record_w._get_filename('approve-%02d' % i)) \
                 or os.path.exists(self.record_w._get_filename('reject-%02d' % i)):
             i += 1
-        print 'Reject, Approve, and move files to ...-%02d' % i
+        print('Reject, Approve, and move files to ...-%02d' % i)
         self.mturk_w.load()
         if mapping_rej:
             self.mturk_w.reject_assignments(mapping_rej)
             shutil.move(self.record_w._get_filename('reject'),
                         self.record_w._get_filename('reject-%02d' % i))
         else:
-            print 'No assignment to reject.'
+            print('No assignment to reject.')
         if mapping_app:
             self.mturk_w.approve_assignments(mapping_app)
             shutil.move(self.record_w._get_filename('approve'),
                         self.record_w._get_filename('approve-%02d' % i))
         else:
-            print 'No assignment to approve.'
+            print('No assignment to approve.')
 
     def approve(self, args):
         """ Approve assignments from the given list.
@@ -738,7 +738,7 @@ class Actions(object):
 
 class CustomArgumentParser(argparse.ArgumentParser):
     def error(self, message):
-        print >> sys.stderr, 'ERROR:', message
+        print('ERROR:', message, file=sys.stderr)
         self.print_help()
         sys.exit(2)
 
@@ -763,4 +763,4 @@ if __name__ == '__main__':
     if hasattr(actions, args.action.lower()):
         getattr(actions, args.action.lower())(args)
     else:
-        print "Action '%s' not recognized" % args.action
+        print("Action '%s' not recognized" % args.action)
