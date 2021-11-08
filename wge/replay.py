@@ -270,7 +270,7 @@ class GroupedReplayBufferTrace(Trace):
 class PrioritizedRewardReplayBufferTrace(Trace):
     def __init__(self, episodes):
         self._rewards = sorted(ep.discounted_return(0, 1.) for ep in episodes)
-        self.median = self._rewards[len(self._rewards) / 2]
+        self.median = self._rewards[int(len(self._rewards) / 2)]
         self.min = self._rewards[0]
         self.max = self._rewards[-1]
         self.mean = sum(self._rewards) / len(self._rewards)

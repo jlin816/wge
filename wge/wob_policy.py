@@ -600,9 +600,9 @@ class MiniWoBPolicy(Policy, metaclass=abc.ABCMeta):
 
         # list of length batch_size
         if self._update_rule == "only-last-experience":
-            model_prob = lambda episode: np.exp(episode[-1].log_prob.data.cpu().numpy()[0])
+            model_prob = lambda episode: np.exp(episode[-1].log_prob.data.cpu().numpy().item())
         elif self._update_rule == "use-whole-episode":
-            model_prob = lambda episode: np.exp(np.sum(exp.log_prob.data.cpu().numpy()[0] for exp in episode))
+            model_prob = lambda episode: np.exp(np.sum(exp.log_prob.data.cpu().numpy().item() for exp in episode))
         else:
             error_msg = "{} not a supported update rule".format(self._update_rule)
             raise NotImplementedError(error_msg)

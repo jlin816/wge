@@ -100,6 +100,7 @@ class TrainingRun(object, metaclass=ABCMeta):
         Args:
             src_dir (str): path to the Git repository
         """
+        return # TODO
         if self.metadata['dirty_repo']:
             raise EnvironmentError('Working directory was dirty when commit was recorded.')
 

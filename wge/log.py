@@ -265,7 +265,7 @@ class ReplayLogger(object):
         # log replay loss
         if replay_loss is not None:
             self._log_stat(REPLAY_LOSS, replay_loss, control_step)
-            replay_loss_as_prob = np.exp(-replay_loss)
+            replay_loss_as_prob = np.exp(-replay_loss.item())
             self._log_stat(REPLAY_LOSS_AS_PROB, replay_loss_as_prob, control_step)
 
         # write trace to file

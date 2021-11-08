@@ -163,7 +163,7 @@ class SequenceBatch(namedtuple('SequenceBatch', ['values', 'mask']), NamedTupleL
         """
         values, mask = seq_batch.values, seq_batch.mask
         # compute weights for the average
-        sums = torch.sum(mask, dim=1)  # (batch_size, 1)
+        sums = torch.sum(mask, dim=1, keepdim=True)  # (batch_size, 1)
 
         if allow_empty:
             sums[sums == 0.0] = 1.0  # Modify in-place: replace zeros with ones

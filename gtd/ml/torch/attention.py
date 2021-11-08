@@ -39,7 +39,7 @@ class Attention(Module):
     def __init__(self, memory_dim, query_dim, attn_dim):
         super(Attention, self).__init__()
         self.tanh = Tanh()
-        self.softmax = Softmax()
+        self.softmax = Softmax(dim=-1)
 
         self.memory_dim = memory_dim
         self.query_dim = query_dim
@@ -110,7 +110,7 @@ class Attention(Module):
         # TODO(kelvin): check for numerical stability. Product of 1's does
         #   not necessarily equal 1 exactly, which we need
 
-        no_cells = (1 - mask).prod(1).expand_as(mask)
+        no_cells = (1 - mask).prod(1, keepdim=True).expand_as(mask)
         return no_cells
 
     @classmethod

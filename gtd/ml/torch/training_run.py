@@ -28,7 +28,7 @@ class TorchTrainingRun(TrainingRun):
         """
         for param in parameters:
             if param.grad is None: continue
-            if not np.isfinite(param.grad.data.sum()):
+            if not np.isfinite(param.grad.data.cpu().sum()):
                 return False
         return True
 

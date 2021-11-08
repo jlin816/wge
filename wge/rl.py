@@ -179,7 +179,7 @@ class ActionScores(object):
         assert isinstance(state_value, Variable)
 
         self._vars = d
-        self._floats = {action: v.data.cpu()[0] for action, v in list(self._vars.items())}
+        self._floats = {action: v.data.cpu().item() for action, v in list(self._vars.items())}
         self._state_value = state_value
 
     @property

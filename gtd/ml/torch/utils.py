@@ -3,8 +3,8 @@ from contextlib import contextmanager
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-from torch import _TensorBase, torch
 from torch.autograd import Variable
+import torch
 
 from gtd.utils import chunks
 
@@ -27,8 +27,7 @@ def to_numpy(x):
     if isinstance(x, Variable):
         x = x.data  # unwrap Variable
 
-    if isinstance(x, _TensorBase):
-        x = x.cpu().numpy()
+    x = x.cpu().numpy()
     return x
 
 
