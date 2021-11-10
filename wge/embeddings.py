@@ -5,6 +5,8 @@ import torch
 
 import numpy as np
 import logging
+from transformers import BertModel, BertTokenizerFast
+from torch.nn.utils.rnn import pad_sequence
 
 from gtd.chrono import verboserate
 from gtd.ml.torch.seq_batch import SequenceBatch, SequenceBatchElement
@@ -178,8 +180,46 @@ class UtteranceVocab(SimpleVocab):
             logging.info("%s embedded as UNK", w)
             return sup.word2index(self.UNK)
 
-
 class UtteranceEmbedder(CachedEmbedder):
+
+    @classmethod
+    def from_config(cls, config):
+        """Constructs the appropriate UtteranceEmbedder from a config.
+
+        Args:
+            config (Config)
+
+        Returns:
+            UtteranceEmbedder
+        """
+        if config.type == "glove":
+            glove_embeddings = GloveEmbeddings(config.vocab_size)
+            token_embedder = TokenEmbedder(glove_embeddings, trainable=False)
+            utterance_embedder = LSTMUtteranceEmbedder(token_embedder, config.lstm_dim)
+        elif config.type == "bert":
+            utterance_embedder = BERTUtteranceEmbedder() 
+        else:
+            raise ValueError(
+                "{} not a supported type of utterance embedder".format(
+                    config.type))
+        return utterance_embedder
+
+    def clear_cache(self):
+        # Keep empty tuple cached, for SequenceBatch
+        self._cache.clear()
+        self._cache.cache(
+            [tuple()], [
+                (GPUVariable(torch.zeros(self._embed_dim)),
+                 SequenceBatchElement(
+                     GPUVariable(torch.zeros(1, self._embed_dim)),
+                     GPUVariable(torch.zeros(1)))
+                 )])
+
+    @property
+    def embed_dim(self):
+        return self._embed_dim
+
+class LSTMUtteranceEmbedder(UtteranceEmbedder):
     """Takes a string, embeds the tokens using the token_embedder, and passes
     the embeddings through a biLSTM padded / masked up to sequence_length.
     Returns the concatenation of the two front and end hidden states.
@@ -199,37 +239,6 @@ class UtteranceEmbedder(CachedEmbedder):
 
         self._cache = Cache()  # tuple[unicode] --> Variable[FloatTensor]
         self.clear_cache()
-
-    @classmethod
-    def from_config(cls, config):
-        """Constructs the appropriate UtteranceEmbedder from a config.
-
-        Args:
-            config (Config)
-
-        Returns:
-            UtteranceEmbedder
-        """
-        if config.type == "glove":
-            glove_embeddings = GloveEmbeddings(config.vocab_size)
-            token_embedder = TokenEmbedder(glove_embeddings, trainable=False)
-            utterance_embedder = cls(token_embedder, config.lstm_dim)
-            return utterance_embedder
-        else:
-            raise ValueError(
-                "{} not a supported type of utterance embedder".format(
-                    config.type))
-
-    def clear_cache(self):
-        # Keep empty tuple cached, for SequenceBatch
-        self._cache.clear()
-        self._cache.cache(
-            [tuple()], [
-                (GPUVariable(torch.zeros(self._embed_dim)),
-                 SequenceBatchElement(
-                     GPUVariable(torch.zeros(1, self._embed_dim)),
-                     GPUVariable(torch.zeros(1)))
-                 )])
 
     def forward(self, utterance):
         """Embeds a batch of utterances.
@@ -281,6 +290,44 @@ class UtteranceEmbedder(CachedEmbedder):
         final_states, combined_states = list(zip(*self._cache.get(utterance)))
         return torch.stack(final_states, 0), combined_states
 
-    @property
-    def embed_dim(self):
-        return self._embed_dim
+class BERTUtteranceEmbedder(UtteranceEmbedder):
+
+    def __init__(self):
+        super().__init__()
+        self._cache = Cache() # tuple[unicode] -> Variable[FloatTensor]
+        self._bert = BertModel.from_pretrained("bert-base-uncased")
+        self._bert_tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
+        self._embed_dim = 768
+        self.clear_cache()
+
+    def _convert_pad_tokens_to_bert(self, utt):
+        return utt.replace("<pad>", "[PAD]")
+
+    def forward(self, utterance):
+        """
+        Args:
+            utterance (list[list[unicode]]): list[unicode] is a list of tokens
+            forming a sentence. list[list[unicode]] is batch of sentences.
+        
+        Returns:
+            utt_embedding: (batch, hidden_dim)
+            per_token_utt_embedding: list[SequenceBatchElement] *Not implemented*
+        """
+        # Make keys hashable
+        utterance = [tuple(utt) for utt in utterance]
+
+        uncached_utterances = self._cache.uncached_keys(utterance)
+
+        # Cache the uncached utterances
+        if len(uncached_utterances) > 0:
+            utts = [self._convert_pad_tokens_to_bert(" ".join(utt)) for utt in uncached_utterances]
+            utts = self._bert_tokenizer(utts, return_tensors="pt", padding=True).to("cuda")
+            utts_ids, utts_mask = utts["input_ids"], utts["attention_mask"]
+            final_states = self._bert(input_ids=utts_ids,
+                    attention_mask=utts_mask).pooler_output
+            self._cache.cache(
+                uncached_utterances,
+                list(zip(final_states, [None] * len(final_states))))
+
+        final_states, combined_states = list(zip(*self._cache.get(utterance)))
+        return torch.stack(final_states, 0), combined_states

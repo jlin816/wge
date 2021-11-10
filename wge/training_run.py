@@ -334,6 +334,7 @@ class MiniWoBTrainingRun(TorchTrainingRun):
         """
         num_instances = self._env.num_instances
         eval_iters = int(num_episodes / num_instances)
+        print("Num eval iters: ", eval_iters)
         all_seeds = list(range(1, eval_iters * num_instances + 1))  # [1, 2, 3, ...]
         episodes = []
         for _ in tqdm(list(range(eval_iters)), desc="Evaluating policy"):
@@ -353,6 +354,9 @@ class MiniWoBTrainingRun(TorchTrainingRun):
 
         avg = lambda seq: sum(seq) / max(len(seq), 1)
         returns = [ep.discounted_return(0, gamma=1.0) for ep in episodes]
+        print("RETURNS: ")
+        print(avg(returns))
+        print(returns)
         return avg(returns)
 
     def _replay_episodes(self, policy, control_step, log, trace):

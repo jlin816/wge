@@ -1,6 +1,6 @@
 from datetime import datetime
 import numpy as np
-from torch.nn.utils import clip_grad_norm
+from torch.nn.utils import clip_grad_norm_ as clip_grad_norm
 
 from gtd.ml.training_run import TrainingRun
 from gtd.ml.torch.checkpoints import Checkpoints
