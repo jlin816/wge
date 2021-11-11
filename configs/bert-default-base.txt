@@ -59,6 +59,8 @@ policy {
 
   utterance_embedder {
     type = "bert"
+    freeze_bert = False
+    learning_rate = 1e-6
   }
 
   dom_embedder {

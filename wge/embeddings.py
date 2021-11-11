@@ -197,7 +197,7 @@ class UtteranceEmbedder(CachedEmbedder):
             token_embedder = TokenEmbedder(glove_embeddings, trainable=False)
             utterance_embedder = LSTMUtteranceEmbedder(token_embedder, config.lstm_dim)
         elif config.type == "bert":
-            utterance_embedder = BERTUtteranceEmbedder() 
+            utterance_embedder = BERTUtteranceEmbedder(freeze_bert=config.freeze_bert) 
         else:
             raise ValueError(
                 "{} not a supported type of utterance embedder".format(
@@ -292,10 +292,15 @@ class LSTMUtteranceEmbedder(UtteranceEmbedder):
 
 class BERTUtteranceEmbedder(UtteranceEmbedder):
 
-    def __init__(self):
+    def __init__(self, freeze_bert=True):
         super().__init__()
         self._cache = Cache() # tuple[unicode] -> Variable[FloatTensor]
         self._bert = BertModel.from_pretrained("bert-base-uncased")
+        self.freeze_bert = freeze_bert
+        if self.freeze_bert:
+            for param in self._bert.parameters():
+                param.requires_grad = False
+
         self._bert_tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
         self._embed_dim = 768
         self.clear_cache()

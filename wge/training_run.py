@@ -128,8 +128,17 @@ class MiniWoBTrainingRun(TorchTrainingRun):
 
         # build neural policy
         neural_policy = try_gpu(MiniWoBPolicy.from_config(config.policy))
-        optimizer = optim.Adam(neural_policy.parameters(),
-                               lr=config.train.learning_rate)
+        if config.policy.utterance_embedder.type == "bert":
+            assert not neural_policy._utterance_embedder.freeze_bert
+            bert_params = neural_policy._utterance_embedder.parameters()
+            other_params = list(set(neural_policy.parameters()) - set(bert_params))
+            optimizer = optim.Adam([
+                {"params": bert_params, "lr": config.policy.utterance_embedder.learning_rate},
+
+                {"params": other_params}], lr=config.train.learning_rate)
+        else:
+            optimizer = optim.Adam(neural_policy.parameters(),
+                lr=config.train.learning_rate)
 
         # TODO: reload replay buffer?
         self.train_state = self.checkpoints.load_latest(
