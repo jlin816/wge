@@ -403,7 +403,8 @@ class MiniWoBTrainingRun(TorchTrainingRun):
         """
         # TODO: Don't hard-code batch size
         if len(demonstrations) > 0:
-            batch = np.random.choice(demonstrations, size=5, replace=True)
+            sampled_demo_idxs = np.random.choice(len(demonstrations), size=5, replace=True)
+            batch = [demonstrations[i] for i in sampled_demo_idxs]
             policy.update_from_demonstrations(
                     batch, lambda loss: self._take_grad_step(
                         self.train_state, loss))

@@ -61,7 +61,7 @@ class TrainingRun(object, metaclass=ABCMeta):
             raise RuntimeError('A commit has already been recorded.')
 
         self.metadata['dirty_repo'] = repo.is_dirty()
-        self.metadata['commit'] = repo.head.object.hexsha.encode('utf-8')
+        self.metadata['commit'] = str(repo.head.object.hexsha.encode('utf-8'))
 
     def dump_diff(self, src_dir):
         patch_dir = self.workspace.git_patches
